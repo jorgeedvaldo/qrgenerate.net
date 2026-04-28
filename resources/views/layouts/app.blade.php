@@ -212,6 +212,7 @@
 
     {{-- EasyQRCodeJS — loaded once, available to all pages --}}
     <script src="https://unpkg.com/easyqrcodejs/dist/easy.qrcode.min.js"></script>
+    <script src="{{ asset('assets/js/qr-generator.js') }}"></script>
 
     {{-- Page-specific scripts --}}
     @stack('scripts')

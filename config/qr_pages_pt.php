@@ -30,7 +30,7 @@ return [
             ['question' => 'O QrGenerate é mesmo grátis?', 'answer' => 'Sim, 100% grátis sem taxas escondidas. Não há limites de QR Codes e não é necessária conta.'],
             ['question' => 'Os meus QR Codes expiram?', 'answer' => 'Não. O QrGenerate cria QR Codes estáticos que codificam os dados directamente na imagem. Nunca expiram.'],
         ],
-        'related_pages' => ['gerador-de-qr-code-sem-cadastro', 'gerador-de-qr-code-privado', 'qr-code-com-logotipo'],
+        'related_pages' => ['gerador-de-qr-code-sem-cadastro', 'gerador-de-qr-code-privado', 'qr-code-com-logotipo', 'qr-code-estatico-vs-dinamico', 'qr-code-para-whatsapp'],
     ],
 
     'gerador-de-qr-code-sem-cadastro' => [
@@ -55,7 +55,7 @@ return [
             ['question' => 'Porque não exigem registo?', 'answer' => 'O QrGenerate gera QR Codes inteiramente no seu navegador. Como nenhum dado é enviado para um servidor, não há nada para associar a uma conta.'],
             ['question' => 'Posso personalizar o QR Code sem conta?', 'answer' => 'Claro. Pode mudar cores, adicionar logótipo e definir texto de impressão — tudo sem se registar.'],
         ],
-        'related_pages' => ['gerador-de-qr-code-gratis', 'gerador-de-qr-code-privado', 'qr-code-estatico-vs-dinamico'],
+        'related_pages' => ['gerador-de-qr-code-gratis', 'gerador-de-qr-code-privado', 'qr-code-estatico-vs-dinamico', 'qr-code-para-wifi', 'qr-code-para-cartao-de-visita'],
     ],
 
     'gerador-de-qr-code-privado' => [
@@ -80,7 +80,7 @@ return [
             ['question' => 'Os meus dados são mesmo privados?', 'answer' => 'Sim. O QrGenerate usa JavaScript exclusivamente no lado do cliente. O seu conteúdo é processado no navegador e nunca transmitido.'],
             ['question' => 'Usam cookies ou rastreadores?', 'answer' => 'Usamos Google Analytics apenas para estatísticas de visitas. O conteúdo dos seus QR Codes nunca é rastreado ou armazenado.'],
         ],
-        'related_pages' => ['gerador-de-qr-code-sem-cadastro', 'gerador-de-qr-code-gratis', 'qr-code-para-wifi'],
+        'related_pages' => ['gerador-de-qr-code-sem-cadastro', 'gerador-de-qr-code-gratis', 'qr-code-para-wifi', 'qr-code-para-email', 'qr-code-para-sms', 'qr-code-estatico-vs-dinamico'],
     ],
 
     'qr-code-estatico-vs-dinamico' => [
@@ -105,7 +105,7 @@ return [
             ['question' => 'Que tipo cria o QrGenerate?', 'answer' => 'O QrGenerate cria QR Codes estáticos. Os seus dados são codificados directamente na imagem sem dependência de servidor, sem expiração e sem custos.'],
             ['question' => 'Os QR Codes dinâmicos são melhores?', 'answer' => 'Não necessariamente. Oferecem flexibilidade mas requerem subscrição e dependem de servidor externo. Os estáticos são grátis, permanentes e privados.'],
         ],
-        'related_pages' => ['gerador-de-qr-code-gratis', 'gerador-de-qr-code-privado'],
+        'related_pages' => ['gerador-de-qr-code-gratis', 'gerador-de-qr-code-privado', 'qr-code-para-cartao-de-visita', 'qr-code-com-logotipo'],
     ],
 
     'qr-code-para-whatsapp' => [
@@ -115,7 +115,7 @@ return [
         'meta_description' => 'Crie um QR Code que abre uma conversa no WhatsApp com mensagem pré-preenchida. Grátis e instantâneo.',
         'h1' => 'QR Code para WhatsApp',
         'intro' => 'Gere um QR Code que abre uma conversa no WhatsApp instantaneamente. Use o formato <code>https://wa.me/NUMERO?text=MENSAGEM</code> para pré-preencher o destinatário e a mensagem.',
-        'qr_type' => 'url',
+        'qr_type' => 'whatsapp',
         'use_cases' => [
             'Adicione um QR WhatsApp ao seu cartão de visita ou montra.',
             'Imprima um QR "Fale connosco" nas mesas do restaurante.',
@@ -130,7 +130,7 @@ return [
             ['question' => 'Que formato devo usar?', 'answer' => 'Use <code>https://wa.me/INDICATIVO+NUMERO?text=SUA+MENSAGEM</code>. Substitua espaços por sinais +.'],
             ['question' => 'O destinatário precisa ter o meu número guardado?', 'answer' => 'Não. O link wa.me funciona mesmo que quem digitaliza não tenha o seu número nos contactos.'],
         ],
-        'related_pages' => ['qr-code-para-sms', 'qr-code-para-email', 'qr-code-para-instagram'],
+        'related_pages' => ['qr-code-para-sms', 'qr-code-para-email', 'qr-code-para-instagram', 'qr-code-para-cartao-de-visita', 'qr-code-com-logotipo'],
     ],
 
     'qr-code-para-wifi' => [
@@ -140,7 +140,7 @@ return [
         'meta_description' => 'Crie um QR Code que liga smartphones à sua rede Wi-Fi automaticamente. Sem digitar passwords. Grátis e privado.',
         'h1' => 'QR Code para Wi-Fi',
         'intro' => 'Permita que os visitantes se liguem ao seu Wi-Fi com uma digitalização. Use o formato <code>WIFI:T:WPA;S:NomeDaRede;P:Password;;</code> para codificar as credenciais.',
-        'qr_type' => 'url',
+        'qr_type' => 'wifi',
         'use_cases' => [
             'Exiba um QR Wi-Fi em quartos de hotel, cafés ou espaços de coworking.',
             'Imprima códigos de acesso Wi-Fi em guias de boas-vindas Airbnb.',
@@ -155,7 +155,7 @@ return [
             ['question' => 'Que tipos de segurança são suportados?', 'answer' => 'Use <code>WPA</code> para WPA/WPA2/WPA3, <code>WEP</code> para WEP, ou vazio para redes abertas.'],
             ['question' => 'Funciona em iPhone e Android?', 'answer' => 'Sim. Tanto iOS (11+) como Android suportam QR Codes Wi-Fi nativamente através da câmara.'],
         ],
-        'related_pages' => ['gerador-de-qr-code-privado', 'qr-code-para-localizacao', 'gerador-de-qr-code-gratis'],
+        'related_pages' => ['gerador-de-qr-code-privado', 'qr-code-para-localizacao', 'gerador-de-qr-code-gratis', 'qr-code-para-menu-de-restaurante', 'qr-code-com-logotipo'],
     ],
 
     'qr-code-com-logotipo' => [
@@ -180,7 +180,7 @@ return [
             ['question' => 'O logótipo torna o QR Code ilegível?', 'answer' => 'Não. O QrGenerate usa o nível máximo de correcção de erros (H), que permite cobrir até 30% do código.'],
             ['question' => 'Que tamanho de logótipo funciona melhor?', 'answer' => 'Mantenha o logótipo abaixo de 25% da área do QR Code. Logótipos quadrados entre 60×60 e 80×80 pixels funcionam melhor.'],
         ],
-        'related_pages' => ['gerador-de-qr-code-gratis', 'qr-code-para-cartao-de-visita', 'qr-code-para-instagram'],
+        'related_pages' => ['gerador-de-qr-code-gratis', 'qr-code-para-cartao-de-visita', 'qr-code-para-instagram', 'qr-code-para-whatsapp', 'qr-code-para-menu-de-restaurante'],
     ],
 
     'qr-code-para-cartao-de-visita' => [
@@ -190,7 +190,7 @@ return [
         'meta_description' => 'Crie um QR Code vCard para o seu cartão de visita. Uma digitalização guarda nome, telefone, email e website.',
         'h1' => 'QR Code para Cartão de Visita',
         'intro' => 'Adicione um QR Code ao seu cartão de visita que guarda os seus dados completos numa digitalização. Codifique um vCard com nome, telefone, email, empresa, cargo e website.',
-        'qr_type' => 'url',
+        'qr_type' => 'vcard',
         'use_cases' => [
             'Imprima um QR Code vCard no verso do seu cartão de visita.',
             'Adicione um QR de contacto à sua assinatura de email.',
@@ -205,7 +205,7 @@ return [
             ['question' => 'O que é o formato vCard?', 'answer' => 'Um vCard começa com BEGIN:VCARD e termina com END:VCARD. Contém campos como FN (nome), TEL (telefone), EMAIL, ORG (empresa), TITLE e URL.'],
             ['question' => 'Quantos dados cabem num QR Code vCard?', 'answer' => 'Um QR Code pode conter até ~4.000 caracteres. Um vCard típico usa 200-400, cabendo confortavelmente.'],
         ],
-        'related_pages' => ['qr-code-para-email', 'qr-code-com-logotipo', 'qr-code-para-whatsapp'],
+        'related_pages' => ['qr-code-para-email', 'qr-code-com-logotipo', 'qr-code-para-whatsapp', 'qr-code-para-localizacao', 'qr-code-para-instagram'],
     ],
 
     'qr-code-para-menu-de-restaurante' => [
@@ -230,7 +230,7 @@ return [
             ['question' => 'Posso actualizar o menu sem mudar o QR Code?', 'answer' => 'Sim — se mantiver o mesmo URL e actualizar o conteúdo (ex: substituir o PDF no mesmo link), o QR Code existente aponta sempre para a versão mais recente.'],
             ['question' => 'Qual o melhor formato para um menu digital?', 'answer' => 'Uma página web responsiva é ideal. Um PDF também funciona mas carrega mais lentamente nos telemóveis.'],
         ],
-        'related_pages' => ['qr-code-para-wifi', 'qr-code-para-localizacao', 'gerador-de-qr-code-gratis'],
+        'related_pages' => ['qr-code-para-wifi', 'qr-code-para-localizacao', 'gerador-de-qr-code-gratis', 'qr-code-para-pdf', 'qr-code-para-whatsapp'],
     ],
 
     'qr-code-para-instagram' => [
@@ -255,7 +255,7 @@ return [
             ['question' => 'Posso ligar a um post específico?', 'answer' => 'Sim. Cole o URL do post individual em vez do URL do perfil.'],
             ['question' => 'Devo usar o Nametag do Instagram?', 'answer' => 'Os Nametags do Instagram foram descontinuados. Um QR Code padrão com o URL do perfil é a abordagem recomendada.'],
         ],
-        'related_pages' => ['qr-code-para-whatsapp', 'qr-code-com-logotipo', 'qr-code-para-cartao-de-visita'],
+        'related_pages' => ['qr-code-para-whatsapp', 'qr-code-com-logotipo', 'qr-code-para-cartao-de-visita', 'qr-code-para-menu-de-restaurante', 'gerador-de-qr-code-gratis'],
     ],
 
     'qr-code-para-pdf' => [
@@ -280,7 +280,7 @@ return [
             ['question' => 'Onde devo alojar o meu PDF?', 'answer' => 'O Google Drive (com partilha "Qualquer pessoa com o link") é grátis e fiável. O seu próprio site oferece carregamento mais rápido.'],
             ['question' => 'Posso actualizar o PDF sem mudar o QR Code?', 'answer' => 'Sim — se substituir o ficheiro no mesmo URL, o QR Code aponta sempre para a versão mais recente.'],
         ],
-        'related_pages' => ['qr-code-para-menu-de-restaurante', 'gerador-de-qr-code-gratis', 'qr-code-com-logotipo'],
+        'related_pages' => ['qr-code-para-menu-de-restaurante', 'gerador-de-qr-code-gratis', 'qr-code-com-logotipo', 'qr-code-para-wifi', 'qr-code-estatico-vs-dinamico'],
     ],
 
     'qr-code-para-localizacao' => [
@@ -290,7 +290,7 @@ return [
         'meta_description' => 'Crie um QR Code que abre uma localização específica no Google Maps. Perfeito para convites, cartões e sinalética.',
         'h1' => 'QR Code para Localização',
         'intro' => 'Ajude as pessoas a encontrá-lo. Crie um QR Code que abre uma localização precisa no Google Maps. Use um link de partilha do Google Maps ou coordenadas no formato <code>geo:LAT,LNG</code>.',
-        'qr_type' => 'url',
+        'qr_type' => 'location',
         'use_cases' => [
             'Adicione um QR de localização a convites de casamento ou eventos.',
             'Imprima direcções em cartões de visita ou papel timbrado.',
@@ -305,7 +305,7 @@ return [
             ['question' => 'Que formato de link devo usar?', 'answer' => 'O mais simples é um link de partilha do Google Maps. Também pode usar o formato geo: URI para compatibilidade multiplataforma.'],
             ['question' => 'Funciona com Apple Maps?', 'answer' => 'Um link Google Maps abre no Google Maps em Android e oferece abrir no Apple Maps em iPhone.'],
         ],
-        'related_pages' => ['qr-code-para-menu-de-restaurante', 'qr-code-para-cartao-de-visita', 'qr-code-para-whatsapp'],
+        'related_pages' => ['qr-code-para-menu-de-restaurante', 'qr-code-para-cartao-de-visita', 'qr-code-para-whatsapp', 'qr-code-para-wifi', 'qr-code-para-instagram'],
     ],
 
     'qr-code-para-email' => [
@@ -315,7 +315,7 @@ return [
         'meta_description' => 'Gere um QR Code que abre um email pré-preenchido. Defina destinatário, assunto e texto automaticamente.',
         'h1' => 'QR Code para Email',
         'intro' => 'Facilite o contacto por email. Crie um QR Code com o formato <code>mailto:</code> que pré-preenche endereço, assunto e corpo da mensagem. Uma digitalização abre o email pronto a enviar.',
-        'qr_type' => 'url',
+        'qr_type' => 'email',
         'use_cases' => [
             'Adicione um QR "Contacte-nos" a materiais de marketing impressos.',
             'Pré-preencha emails de feedback em embalagens de produtos.',
@@ -330,7 +330,7 @@ return [
             ['question' => 'Qual é o formato mailto?', 'answer' => 'Use <code>mailto:email@exemplo.com?subject=Seu+Assunto&body=Sua+Mensagem</code>. Substitua espaços por +.'],
             ['question' => 'Funciona em todos os telemóveis?', 'answer' => 'Sim. O protocolo mailto: é suportado por todos os smartphones modernos e abre a app de email predefinida.'],
         ],
-        'related_pages' => ['qr-code-para-sms', 'qr-code-para-whatsapp', 'qr-code-para-cartao-de-visita'],
+        'related_pages' => ['qr-code-para-sms', 'qr-code-para-whatsapp', 'qr-code-para-cartao-de-visita', 'gerador-de-qr-code-privado', 'qr-code-para-instagram'],
     ],
 
     'qr-code-para-sms' => [
@@ -340,7 +340,7 @@ return [
         'meta_description' => 'Crie um QR Code que abre uma mensagem SMS pré-preenchida. Defina número e texto automaticamente.',
         'h1' => 'QR Code para SMS',
         'intro' => 'Gere um QR Code que abre a app de mensagens com número e texto pré-preenchidos. Use o formato <code>sms:+351912345678?body=Sua+Mensagem</code>.',
-        'qr_type' => 'url',
+        'qr_type' => 'sms',
         'use_cases' => [
             'Crie QR Codes de opt-in para campanhas de SMS marketing.',
             'Adicione um QR "Envie-nos uma mensagem" a cartões ou montras.',
@@ -355,7 +355,7 @@ return [
             ['question' => 'Que formato SMS funciona melhor?', 'answer' => 'Use <code>sms:+INDICATIVONUMERO?body=Mensagem</code> para iOS e Android modernos.'],
             ['question' => 'O SMS é enviado automaticamente?', 'answer' => 'Não. Por razões de segurança, digitalizar o QR Code apenas pré-preenche a mensagem. O utilizador deve tocar em "Enviar" manualmente.'],
         ],
-        'related_pages' => ['qr-code-para-whatsapp', 'qr-code-para-email', 'gerador-de-qr-code-gratis'],
+        'related_pages' => ['qr-code-para-whatsapp', 'qr-code-para-email', 'gerador-de-qr-code-gratis', 'qr-code-para-cartao-de-visita', 'qr-code-para-instagram'],
     ],
 
 ];

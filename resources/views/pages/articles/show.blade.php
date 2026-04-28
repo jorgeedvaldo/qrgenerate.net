@@ -76,6 +76,36 @@ if (!empty($article['cover'])) {
         </div>
     </article>
 
+    {{-- Popular Tools --}}
+    @php
+        if (($locale ?? 'en') === 'pt') {
+            $popularTools = [
+                ['url' => '/pt/qr-code-para-whatsapp', 'title' => 'QR Code para WhatsApp', 'icon' => 'comment'],
+                ['url' => '/pt/qr-code-para-wifi', 'title' => 'QR Code para Wi-Fi', 'icon' => 'signal'],
+                ['url' => '/pt/qr-code-com-logotipo', 'title' => 'QR Code com Logotipo', 'icon' => 'picture'],
+                ['url' => '/pt/qr-code-para-cartao-de-visita', 'title' => 'QR Code para Cartão de Visita', 'icon' => 'user'],
+                ['url' => '/pt/qr-code-para-menu-de-restaurante', 'title' => 'QR Code para Menu de Restaurante', 'icon' => 'cutlery'],
+                ['url' => '/pt/gerador-de-qr-code-privado', 'title' => 'Gerador de QR Code Privado', 'icon' => 'lock'],
+            ];
+            $popularTitle = 'Ferramentas populares de QR Code';
+        } else {
+            $popularTools = [
+                ['url' => '/qr-code-for-whatsapp', 'title' => 'QR Code for WhatsApp', 'icon' => 'comment'],
+                ['url' => '/qr-code-for-wifi', 'title' => 'QR Code for Wi-Fi', 'icon' => 'signal'],
+                ['url' => '/qr-code-with-logo', 'title' => 'QR Code with Logo', 'icon' => 'picture'],
+                ['url' => '/qr-code-for-business-card', 'title' => 'QR Code for Business Card', 'icon' => 'user'],
+                ['url' => '/qr-code-for-restaurant-menu', 'title' => 'QR Code for Restaurant Menu', 'icon' => 'cutlery'],
+                ['url' => '/private-qr-code-generator', 'title' => 'Private QR Code Generator', 'icon' => 'lock'],
+            ];
+            $popularTitle = 'Popular QR Code Tools';
+        }
+    @endphp
+    @include('components.related-links', [
+        'title' => $popularTitle,
+        'links' => $popularTools,
+        'style' => 'grid'
+    ])
+
     {{-- Related Articles --}}
     @if(!empty($related))
     <div class="article-section">

@@ -1,50 +1,211 @@
 {{-- QR Code Generator Component
-     Reusable client-side QR code generator.
-     All generation happens in the browser — no server requests.
+     Props:
+     - type (string): url, wifi, whatsapp, vcard, email, sms, phone, location
+     - locale (string): en, pt
 --}}
+@php
+    $type = $type ?? 'url';
+    $locale = $locale ?? 'en';
+    $isPt = $locale === 'pt';
+@endphp
 
-<div class="row">
+<div class="row" id="qr-generator-component">
+    <input type="hidden" id="qr-type-val" value="{{ $type }}">
+    
     {{-- Left Column: Settings --}}
     <div class="col-md-6">
         <div class="panel panel-purple">
             <div class="panel-heading">
-                <h3 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Configuration</h3>
+                <h3 class="panel-title"><span class="glyphicon glyphicon-cog"></span> {{ $isPt ? 'Configuração do QR Code' : 'QR Code Configuration' }}</h3>
             </div>
             <div class="panel-body">
 
-                <div class="form-group">
-                    <label for="qr-text">URL or Text Content <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="qr-text" placeholder="https://www.example.com">
-                </div>
+                {{-- Dynamic Forms Wrapper --}}
+                <div id="qr-dynamic-form">
+                    
+                    @if(in_array($type, ['url', 'instagram', 'restaurant-menu', 'pdf', 'event']))
+                        <div class="form-group">
+                            <label for="qr-text">URL / {{ $isPt ? 'Texto' : 'Text' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="qr-text" placeholder="https://www.example.com">
+                        </div>
+                    @endif
 
-                <div class="form-group">
-                    <label for="qr-logo">Upload Logo (Optional)</label>
-                    <input type="file" id="qr-logo" class="form-control" accept="image/png, image/jpeg">
-                    <p class="help-block">PNG or JPG. Will be centered on the QR Code.</p>
-                </div>
+                    @if($type === 'wifi')
+                        <div class="row">
+                            <div class="col-sm-6 form-group">
+                                <label for="wifi-ssid">{{ $isPt ? 'Nome da Rede (SSID)' : 'Network Name (SSID)' }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="wifi-ssid" placeholder="MyWiFiNetwork">
+                            </div>
+                            <div class="col-sm-6 form-group">
+                                <label for="wifi-password">Password</label>
+                                <input type="text" class="form-control" id="wifi-password" placeholder="********">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 form-group">
+                                <label for="wifi-encryption">{{ $isPt ? 'Segurança' : 'Encryption' }}</label>
+                                <select class="form-control" id="wifi-encryption">
+                                    <option value="WPA">WPA/WPA2/WPA3</option>
+                                    <option value="WEP">WEP</option>
+                                    <option value="nopass">{{ $isPt ? 'Sem Password' : 'None' }}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6 form-group" style="padding-top: 25px;">
+                                <label>
+                                    <input type="checkbox" id="wifi-hidden"> {{ $isPt ? 'Rede Oculta' : 'Hidden Network' }}
+                                </label>
+                            </div>
+                        </div>
+                    @endif
 
-                <div class="color-picker-group">
-                    <div>
-                        <label for="qr-color-dark">QR Color</label>
-                        <input type="color" id="qr-color-dark" value="#000000">
-                    </div>
-                    <div>
-                        <label for="qr-color-light">Background</label>
-                        <input type="color" id="qr-color-light" value="#ffffff">
-                    </div>
+                    @if($type === 'whatsapp')
+                        <div class="row">
+                            <div class="col-sm-4 form-group">
+                                <label for="wa-code">{{ $isPt ? 'Indicativo' : 'Country Code' }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="wa-code" placeholder="e.g. 1 or 351">
+                            </div>
+                            <div class="col-sm-8 form-group">
+                                <label for="wa-phone">{{ $isPt ? 'Número de Telefone' : 'Phone Number' }} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="wa-phone" placeholder="123456789">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="wa-message">{{ $isPt ? 'Mensagem Inicial (Opcional)' : 'Initial Message (Optional)' }}</label>
+                            <textarea class="form-control" id="wa-message" rows="2" placeholder="{{ $isPt ? 'Olá, gostaria de saber mais...' : 'Hello, I would like to know more...' }}"></textarea>
+                        </div>
+                    @endif
+
+                    @if($type === 'vcard')
+                        <div class="row">
+                            <div class="col-sm-6 form-group">
+                                <label for="vcard-fname">{{ $isPt ? 'Nome' : 'First Name' }}</label>
+                                <input type="text" class="form-control" id="vcard-fname">
+                            </div>
+                            <div class="col-sm-6 form-group">
+                                <label for="vcard-lname">{{ $isPt ? 'Apelido' : 'Last Name' }}</label>
+                                <input type="text" class="form-control" id="vcard-lname">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 form-group">
+                                <label for="vcard-phone">{{ $isPt ? 'Telemóvel' : 'Mobile Phone' }}</label>
+                                <input type="text" class="form-control" id="vcard-phone">
+                            </div>
+                            <div class="col-sm-6 form-group">
+                                <label for="vcard-email">Email</label>
+                                <input type="email" class="form-control" id="vcard-email">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 form-group">
+                                <label for="vcard-company">{{ $isPt ? 'Empresa' : 'Company' }}</label>
+                                <input type="text" class="form-control" id="vcard-company">
+                            </div>
+                            <div class="col-sm-6 form-group">
+                                <label for="vcard-title">{{ $isPt ? 'Cargo' : 'Job Title' }}</label>
+                                <input type="text" class="form-control" id="vcard-title">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="vcard-website">Website</label>
+                            <input type="text" class="form-control" id="vcard-website" placeholder="https://">
+                        </div>
+                        <div class="form-group">
+                            <label for="vcard-address">{{ $isPt ? 'Morada' : 'Address' }}</label>
+                            <input type="text" class="form-control" id="vcard-address">
+                        </div>
+                    @endif
+
+                    @if($type === 'email')
+                        <div class="form-group">
+                            <label for="email-to">{{ $isPt ? 'Enviar Para (Email)' : 'Send To (Email)' }} <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email-to" placeholder="hello@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="email-subject">{{ $isPt ? 'Assunto' : 'Subject' }}</label>
+                            <input type="text" class="form-control" id="email-subject">
+                        </div>
+                        <div class="form-group">
+                            <label for="email-body">{{ $isPt ? 'Mensagem' : 'Message Body' }}</label>
+                            <textarea class="form-control" id="email-body" rows="3"></textarea>
+                        </div>
+                    @endif
+
+                    @if($type === 'sms')
+                        <div class="form-group">
+                            <label for="sms-phone">{{ $isPt ? 'Número de Destino' : 'Destination Number' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="sms-phone" placeholder="+1234567890">
+                        </div>
+                        <div class="form-group">
+                            <label for="sms-message">{{ $isPt ? 'Mensagem' : 'Message' }}</label>
+                            <textarea class="form-control" id="sms-message" rows="2"></textarea>
+                        </div>
+                    @endif
+
+                    @if($type === 'phone')
+                        <div class="form-group">
+                            <label for="phone-number">{{ $isPt ? 'Número de Telefone' : 'Phone Number' }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="phone-number" placeholder="+1234567890">
+                        </div>
+                    @endif
+
+                    @if($type === 'location')
+                        <div class="row">
+                            <div class="col-sm-6 form-group">
+                                <label for="loc-lat">Latitude <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="loc-lat" placeholder="40.7128">
+                            </div>
+                            <div class="col-sm-6 form-group">
+                                <label for="loc-lng">Longitude <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="loc-lng" placeholder="-74.0060">
+                            </div>
+                        </div>
+                        <p class="help-block"><small>{{ $isPt ? 'Pode encontrar a latitude/longitude no Google Maps ao clicar com o botão direito num local.' : 'You can find lat/lng on Google Maps by right-clicking a location.' }}</small></p>
+                    @endif
+
                 </div>
 
                 <hr>
-                <h4>Print Settings</h4>
-                <div class="form-group">
-                    <label for="print-text">Call to Action Text (For Printing)</label>
-                    <input type="text" class="form-control" id="print-text" value="Scan the code here!"
-                        placeholder="e.g., Scan for Menu">
+                <h4><span class="glyphicon glyphicon-tint"></span> {{ $isPt ? 'Aparência' : 'Appearance' }}</h4>
+                <div id="qr-appearance-settings">
+                    <div class="row">
+                        <div class="col-sm-6 form-group">
+                            <label for="qr-color-dark">{{ $isPt ? 'Cor do QR Code' : 'QR Color' }}</label>
+                            <input type="color" class="form-control" style="padding:0; height:40px;" id="qr-color-dark" value="#000000">
+                        </div>
+                        <div class="col-sm-6 form-group">
+                            <label for="qr-color-light">{{ $isPt ? 'Fundo' : 'Background' }}</label>
+                            <input type="color" class="form-control" style="padding:0; height:40px;" id="qr-color-light" value="#ffffff">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6 form-group">
+                            <label for="qr-size">{{ $isPt ? 'Tamanho (px)' : 'Size (px)' }}</label>
+                            <input type="number" class="form-control" id="qr-size" value="250" min="100" max="1000" step="10">
+                        </div>
+                        <div class="col-sm-6 form-group">
+                            <label for="qr-margin">{{ $isPt ? 'Margem (px)' : 'Margin (px)' }}</label>
+                            <input type="number" class="form-control" id="qr-margin" value="15" min="0" max="100" step="5">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qr-logo">{{ $isPt ? 'Logótipo Central (Opcional)' : 'Center Logo (Optional)' }}</label>
+                        <input type="file" id="qr-logo" class="form-control" accept="image/png, image/jpeg, image/svg+xml">
+                        <p class="help-block"><small>{{ $isPt ? 'O logótipo deve ser quadrado.' : 'Logo should be square.' }}</small></p>
+                    </div>
                 </div>
 
-                <button class="btn btn-purple btn-lg btn-block" onclick="generateQR()">
-                    <span class="glyphicon glyphicon-refresh"></span> Generate QR Code
-                </button>
+                {{-- Privacy Note --}}
+                <div class="alert alert-success" style="margin-top: 20px; font-size: 13px;">
+                    <span class="glyphicon glyphicon-lock"></span> 
+                    <strong>{{ $isPt ? 'Privacidade Garantida:' : 'Privacy Guaranteed:' }}</strong><br>
+                    {{ $isPt 
+                        ? 'O seu QR Code é gerado localmente no navegador. Os seus dados não são enviados para os nossos servidores.'
+                        : 'Your QR code is generated locally in your browser. Your data is not sent to our servers.' 
+                    }}
+                </div>
 
             </div>
         </div>
@@ -54,175 +215,39 @@
     <div class="col-md-6">
         <div class="panel panel-purple">
             <div class="panel-heading">
-                <h3 class="panel-title"><span class="glyphicon glyphicon-eye-open"></span> Preview & Actions
-                </h3>
+                <h3 class="panel-title"><span class="glyphicon glyphicon-eye-open"></span> {{ $isPt ? 'Pré-visualização' : 'Preview' }}</h3>
             </div>
             <div class="panel-body text-center">
 
-                <div id="qrcode-container">
-                    <span class="text-muted">Your QR Code will appear here.</span>
+                <div id="qrcode-container" style="min-height: 280px; display: flex; justify-content: center; align-items: center; background: #fff; border: 1px dashed #ccc; padding: 15px; margin-bottom: 20px;">
+                    <span class="text-muted">{{ $isPt ? 'O seu QR Code aparecerá aqui.' : 'Your QR Code will appear here.' }}</span>
                 </div>
 
-                <div id="action-buttons">
-                    <button class="btn btn-default" onclick="downloadQR()">
-                        <span class="glyphicon glyphicon-download-alt"></span> Download PNG
+                <div id="action-buttons" style="display: none;">
+                    <button class="btn btn-purple btn-lg btn-block" style="margin-bottom: 15px;" id="btn-download-png">
+                        <span class="glyphicon glyphicon-download-alt"></span> {{ $isPt ? 'Descarregar PNG' : 'Download PNG' }}
                     </button>
-                    <button class="btn btn-info" onclick="printQR()">
-                        <span class="glyphicon glyphicon-print"></span> Print Flyer
-                    </button>
-                    <button class="btn btn-warning" onclick="embedQR()">
-                        <span class="glyphicon glyphicon-share"></span> Embed HTML
-                    </button>
-
-                    <textarea id="embed-code" class="form-control" rows="3" readonly></textarea>
+                    
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <button class="btn btn-default btn-block" id="btn-download-svg" title="Vector format (SVG)">
+                                SVG
+                            </button>
+                        </div>
+                        <div class="col-xs-4">
+                            <button class="btn btn-default btn-block" id="btn-copy-img">
+                                <span class="glyphicon glyphicon-duplicate"></span> {{ $isPt ? 'Copiar' : 'Copy' }}
+                            </button>
+                        </div>
+                        <div class="col-xs-4">
+                            <button class="btn btn-default btn-block" id="btn-print">
+                                <span class="glyphicon glyphicon-print"></span> {{ $isPt ? 'Imprimir' : 'Print' }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
         </div>
     </div>
 </div>
-
-{{-- QR Code Generator JavaScript --}}
-@verbatim
-<script>
-    var currentQRCode = null;
-
-    function generateQR() {
-        var text = document.getElementById("qr-text").value.trim();
-        var logoFile = document.getElementById("qr-logo").files[0];
-        var colorDark = document.getElementById("qr-color-dark").value;
-        var colorLight = document.getElementById("qr-color-light").value;
-        var container = document.getElementById("qrcode-container");
-
-        if (!text) {
-            alert("Please enter a URL or text to generate the QR Code.");
-            return;
-        }
-
-        // Clear previous QR
-        container.innerHTML = "";
-
-        // Base options
-        var options = {
-            text: text,
-            width: 250,
-            height: 250,
-            colorDark: colorDark,
-            colorLight: colorLight,
-            correctLevel: QRCode.CorrectLevel.H, // Required for logos
-            quietZone: 15,
-            quietZoneColor: colorLight
-        };
-
-        // If user uploaded a logo
-        if (logoFile) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                options.logo = e.target.result;
-                options.logoWidth = 60;
-                options.logoHeight = 60;
-                options.logoBackgroundTransparent = false;
-                options.logoBackgroundColor = colorLight;
-
-                renderQR(container, options);
-            };
-            reader.readAsDataURL(logoFile);
-        } else {
-            renderQR(container, options);
-        }
-    }
-
-    function renderQR(container, options) {
-        currentQRCode = new QRCode(container, options);
-        document.getElementById("action-buttons").style.display = "block";
-        document.getElementById("embed-code").style.display = "none";
-    }
-
-    function getBase64Image() {
-        var canvas = document.querySelector("#qrcode-container canvas");
-        return canvas ? canvas.toDataURL("image/png") : null;
-    }
-
-    function downloadQR() {
-        var base64 = getBase64Image();
-        if (!base64) return;
-
-        var link = document.createElement('a');
-        link.download = 'QrGenerate-Code.png';
-        link.href = base64;
-        link.click();
-    }
-
-    function embedQR() {
-        var base64 = getBase64Image();
-        if (!base64) return;
-
-        var textarea = document.getElementById("embed-code");
-        var htmlString = `<img src="${base64}" alt="Generated QR Code" width="250" height="250">`;
-
-        textarea.value = htmlString;
-        textarea.style.display = "block";
-        textarea.select();
-    }
-
-    function printQR() {
-        var base64 = getBase64Image();
-        var printText = document.getElementById("print-text").value || "Scan the code here!";
-
-        if (!base64) return;
-
-        var printWindow = window.open('', '_blank', 'width=800,height=800');
-
-        var printHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Print QR Code</title>
-                <style>
-                    body {
-                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        height: 100vh;
-                        margin: 0;
-                        text-align: center;
-                    }
-                    .print-container {
-                        border: 3px dashed #333;
-                        padding: 50px;
-                        border-radius: 15px;
-                    }
-                    h1 {
-                        font-size: 48px;
-                        color: #333;
-                        margin-bottom: 30px;
-                        text-transform: uppercase;
-                        letter-spacing: 2px;
-                    }
-                    img {
-                        width: 400px;
-                        height: 400px;
-                        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-                    }
-                    @media print {
-                        .print-container { border: none; }
-                        img { box-shadow: none; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="print-container">
-                    <h1>${printText}</h1>
-                    <img src="${base64}" onload="window.print(); window.close();" />
-                </div>
-            </body>
-            </html>
-        `;
-
-        printWindow.document.write(printHTML);
-        printWindow.document.close();
-    }
-</script>
-@endverbatim

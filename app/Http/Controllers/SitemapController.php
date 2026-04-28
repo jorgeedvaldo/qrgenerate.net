@@ -54,6 +54,20 @@ class SitemapController extends Controller
             ];
         }
 
+        // ── Institutional pages ──
+        $institutional = [
+            'privacy-policy', 'terms-of-use', 'about', 'contact',
+            'pt/politica-de-privacidade', 'pt/termos-de-uso', 'pt/sobre', 'pt/contacto'
+        ];
+        foreach ($institutional as $instSlug) {
+            $urls[] = [
+                'loc' => "{$baseUrl}/{$instSlug}",
+                'lastmod' => $today,
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ];
+        }
+
         // ── Article index pages ──
         $urls[] = ['loc' => "{$baseUrl}/articles", 'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.7'];
         $urls[] = ['loc' => "{$baseUrl}/pt/artigos", 'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.7'];

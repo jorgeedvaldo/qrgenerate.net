@@ -23,6 +23,19 @@ Route::get('/robots.txt', RobotsController::class)->name('robots');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/pt', [HomeController::class, 'indexPt'])->name('home.pt');
 
+// Institutional pages — English
+use App\Http\Controllers\PageController;
+Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy');
+Route::get('/terms-of-use', [PageController::class, 'terms'])->name('terms');
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+
+// Institutional pages — Portuguese
+Route::get('/pt/politica-de-privacidade', [PageController::class, 'privacyPt'])->name('privacy.pt');
+Route::get('/pt/termos-de-uso', [PageController::class, 'termsPt'])->name('terms.pt');
+Route::get('/pt/sobre', [PageController::class, 'aboutPt'])->name('about.pt');
+Route::get('/pt/contacto', [PageController::class, 'contactPt'])->name('contact.pt');
+
 // Articles — English
 Route::get('/articles', [ArticleController::class, 'index'])
     ->name('articles.index')

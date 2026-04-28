@@ -1,35 +1,7 @@
 @extends('layouts.app')
 
 @push('schema')
-{{-- JSON-LD Article Schema --}}
-@php
-$schemaData = [
-    '@context' => 'https://schema.org',
-    '@type' => 'Article',
-    'mainEntityOfPage' => [
-        '@type' => 'WebPage',
-        '@id' => config('qrgenerate.url') . '/',
-    ],
-    'headline' => 'The Complete Guide to QR Codes: How They Work, Why They Matter, and How to Create the Perfect One',
-    'image' => [config('qrgenerate.url') . '/images/qrgenerate-cover.jpg'],
-    'datePublished' => '2023-10-25T08:00:00+08:00',
-    'dateModified' => '2024-09-01T08:00:00+08:00',
-    'author' => [
-        '@type' => 'Organization',
-        'name' => config('qrgenerate.seo.author'),
-    ],
-    'publisher' => [
-        '@type' => 'Organization',
-        'name' => config('qrgenerate.name'),
-        'logo' => [
-            '@type' => 'ImageObject',
-            'url' => config('qrgenerate.url') . '/images/logo.png',
-        ],
-    ],
-    'description' => 'QR codes have evolved from niche inventory labels into one of the most versatile digital-to-physical bridges in modern marketing. This guide covers everything from technology to design best practices.',
-];
-@endphp
-<script type="application/ld+json">{!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}</script>
+{{-- Web Application Schema --}}
 @php
 $webAppSchema = [
     '@context' => 'https://schema.org',
@@ -47,130 +19,187 @@ $webAppSchema = [
 
 @section('content')
 
-    {{-- Hero / Jumbotron --}}
-    <div class="jumbotron text-center">
-        <h1>Create Your Custom QR Code</h1>
-        <p>{{ config('qrgenerate.slogan') }} Generate high-quality QR codes directly in your browser.</p>
-    </div>
-
-    {{-- QR Code Generator --}}
-    @include('components.qr-generator')
-
-    {{-- Article Section --}}
-    <div id="about">
-        <div class="article-section">
-            <h2>The Complete Guide to QR Codes: How They Work, Why They Matter, and How to Create the Perfect One
-            </h2>
-            <p class="lead">QR codes have evolved from niche inventory labels into one of the most versatile
-                digital-to-physical bridges in modern marketing, healthcare, logistics, and everyday life. This
-                guide covers everything you need to know — from the underlying technology to design best practices.
-            </p>
-
-            <h3>What is a QR Code?</h3>
-            <p>A Quick Response (QR) code is a two-dimensional barcode first invented in 1994 by Masahiro Hara at
-                Denso Wave, a Japanese automotive components manufacturer. Unlike traditional one-dimensional
-                barcodes that store data in parallel lines, a QR code uses a matrix of black-and-white squares
-                arranged in a square grid. This allows it to store significantly more information — up to 7,089
-                numeric characters or 4,296 alphanumeric characters — in a compact visual format.</p>
-            <p>The three distinctive square "finder patterns" in the corners of a QR code allow any scanner to
-                detect orientation instantly, making them readable from any angle and even at up to 30% physical
-                damage when using the highest error-correction level (Level H).</p>
-
-            <div class="tip-box">
-                <p><strong>Did you know?</strong> QrGenerate uses Error Correction Level H by default, which means
-                    your QR code remains fully scannable even if nearly a third of it is covered — perfect for
-                    placing logos in the center.</p>
-            </div>
-
-            <h3>How does a QR code scanner work?</h3>
-            <p>Modern smartphones use their cameras to capture the QR code image in real time. The device's
-                image-processing software locates the three finder squares, determines the code's orientation and
-                scale, then decodes the binary matrix row by row. The decoded data — usually a URL — is immediately
-                presented to the user as a tappable link. This entire process typically takes under half a second.
-            </p>
-
-            <h3>Where are QR codes used today?</h3>
-            <ul>
-                <li><strong>Marketing and advertising</strong> — linking print materials, billboards, and packaging
-                    to landing pages, videos, or discount codes.</li>
-                <li><strong>Restaurants and hospitality</strong> — contactless digital menus, feedback forms, and
-                    Wi-Fi login shortcuts.</li>
-                <li><strong>Payments</strong> — mobile payment systems like Alipay, WeChat Pay, and various banking
-                    apps rely entirely on QR codes.</li>
-                <li><strong>Healthcare</strong> — patient wristbands, medication labels, and vaccine certificates
-                    often embed QR codes for instant record access.</li>
-                <li><strong>Events and ticketing</strong> — boarding passes, concert tickets, and conference badges
-                    use QR codes for fast, fraud-resistant entry.</li>
-                <li><strong>Education</strong> — classroom worksheets, textbooks, and museum exhibits link to
-                    supplementary content via QR codes.</li>
-                <li><strong>Smart packaging</strong> — brands encode product information, authenticity verification,
-                    and recycling instructions in QR codes on labels.</li>
-            </ul>
-
-            <h3>Static vs. dynamic QR codes</h3>
-            <p>A <strong>static QR code</strong> (like those created with QrGenerate) encodes data permanently into
-                the visual pattern. The URL or text is baked into the code itself; changing the destination requires
-                generating a new code. Static codes are ideal for permanent use cases — business cards, signage,
-                product packaging — because they have no expiry date and require no subscription or server.</p>
-            <p>A <strong>dynamic QR code</strong> stores a short redirect URL that can be updated after printing.
-                This is useful for campaigns where the destination changes frequently, but it depends on a
-                third-party service remaining active.</p>
-
-            <h3>Designing an effective QR code</h3>
-            <p>The visual design of your QR code significantly impacts both scan rates and brand perception. Here
-                are the key principles to follow:</p>
-            <ul>
-                <li><strong>Maintain sufficient contrast.</strong> The dark modules must contrast sharply against
-                    the light background. Aim for at least a 3:1 contrast ratio.</li>
-                <li><strong>Keep a quiet zone.</strong> Always leave a border of at least four module widths ("quiet
-                    zone") around the code. Without it, scanners struggle to find the edges.</li>
-                <li><strong>Size it appropriately.</strong> A QR code should be at least 2 cm × 2 cm for close-range
-                    scanning. For billboards or posters viewed from a distance, scale proportionally.</li>
-                <li><strong>Choose the right error correction.</strong> Use Level H (30% redundancy) whenever you
-                    add a logo or overlay. For clean, logo-free codes, Level M or Q offers a good balance of data
-                    density and resilience.</li>
-                <li><strong>Test before you print.</strong> Scan your code with multiple devices and apps —
-                    including older Android phones — before committing to large print runs.</li>
-            </ul>
-
-            <div class="tip-box">
-                <p><strong>Pro tip:</strong> Adding a "Scan the code here" label below your QR code increases scan
-                    rates by up to 40%, according to multiple field studies. QrGenerate lets you customize this text
-                    directly in the Print Label field above.</p>
-            </div>
-
-            <h3>Why use QrGenerate?</h3>
-            <p>QrGenerate is a fully browser-based QR code generator — no installation, no account, no data sent to
-                any server. Your logo image is read locally by your browser and embedded directly into the QR code
-                canvas. The result is a high-resolution PNG you can download instantly, print at any size, or copy
-                as embeddable HTML for your website.</p>
-            <p>Key features include custom dark and light colors (so your code can match your brand palette),
-                adjustable print labels with sub-text, logo support with automatic transparent background handling,
-                and a clean one-click download workflow.</p>
-
-            <h3>Best practices for printing QR codes</h3>
-            <p>When preparing your QR code for print media, keep the following in mind:</p>
-            <ul>
-                <li>Always download the PNG at the largest size you need. QrGenerate generates at 250×250 px by
-                    default; for large-format print, scale up in a vector editor.</li>
-                <li>Place a clear call-to-action near the code — "Scan with your camera" or "Scan to learn more"
-                    removes hesitation from first-time scanners.</li>
-                <li>Avoid placing QR codes on reflective surfaces (glossy laminate, metallic foil) without testing —
-                    strong reflections can confuse scanners.</li>
-                <li>On dark backgrounds, invert the color scheme: use a white or light code on a dark background,
-                    and ensure there is still sufficient quiet zone.</li>
-            </ul>
-
-            <h3>Privacy and security considerations</h3>
-            <p>Because QR codes are opaque to the human eye, users cannot tell at a glance where a code will send
-                them. Always use a recognizable, trustworthy domain as your QR code destination. For physical
-                installations in public spaces, check periodically that no one has placed a sticker over your code
-                to redirect visitors to a malicious URL — a practice known as "QR code jacking." Educate your
-                audience to preview the URL before tapping when in doubt.</p>
-
-            <p style="margin-top:24px; color:#888; font-size:13px;">Last updated: September 2024 &middot; QrGenerate
-                &middot; All QR codes are generated locally in your browser. No data is stored or transmitted.</p>
+    {{-- Hero Section --}}
+    <div class="jumbotron text-center" style="margin-bottom: 40px;">
+        <h1>Free QR Code Generator with Logo</h1>
+        <p class="lead" style="max-width: 800px; margin: 0 auto 20px;">
+            Create custom QR codes for links, WhatsApp, Wi-Fi, business cards, menus and more. 
+            No signup required. Generated privately in your browser.
+        </p>
+        <div>
+            <a href="#generator" class="btn btn-purple btn-lg" style="margin: 5px;">Create QR Code</a>
+            <a href="#qr-types" class="btn btn-default btn-lg" style="margin: 5px; border: 2px solid white; color: white; background: transparent;">Explore QR Code types</a>
         </div>
     </div>
 
+    {{-- QR Code Generator Component --}}
+    <div id="generator" style="margin-bottom: 60px;">
+        @include('components.qr-generator', ['type' => 'url', 'locale' => 'en'])
+    </div>
+
+    {{-- Section: Create QR codes for anything --}}
+    <div id="qr-types" class="article-section text-center">
+        <h2>Create QR codes for anything</h2>
+        <p class="lead" style="margin-bottom: 40px;">Choose the type of QR code you want to generate.</p>
+        
+        <div class="row">
+            @php
+                $types = [
+                    ['url' => '/free-qr-code-generator', 'icon' => 'globe', 'title' => 'Website URL', 'desc' => 'Link to any web page'],
+                    ['url' => '/qr-code-for-whatsapp', 'icon' => 'comment', 'title' => 'WhatsApp', 'desc' => 'Start a chat instantly'],
+                    ['url' => '/qr-code-for-wifi', 'icon' => 'signal', 'title' => 'Wi-Fi', 'desc' => 'Auto-connect to networks'],
+                    ['url' => '/qr-code-for-business-card', 'icon' => 'user', 'title' => 'Business Card', 'desc' => 'Share vCard details'],
+                    ['url' => '/qr-code-for-restaurant-menu', 'icon' => 'cutlery', 'title' => 'Restaurant Menu', 'desc' => 'Digital contactless menus'],
+                    ['url' => '/qr-code-for-email', 'icon' => 'envelope', 'title' => 'Email', 'desc' => 'Pre-fill email address'],
+                    ['url' => '/qr-code-for-sms', 'icon' => 'phone', 'title' => 'SMS', 'desc' => 'Pre-fill text messages'],
+                    ['url' => '/qr-code-for-location', 'icon' => 'map-marker', 'title' => 'Location', 'desc' => 'Open Google Maps'],
+                    ['url' => '/qr-code-for-pdf', 'icon' => 'file', 'title' => 'PDF', 'desc' => 'Link to documents'],
+                    ['url' => '/qr-code-for-instagram', 'icon' => 'camera', 'title' => 'Social Media', 'desc' => 'Link to Instagram profiles'],
+                ];
+            @endphp
+
+            @foreach($types as $t)
+            <div class="col-md-3 col-sm-4 col-xs-6" style="margin-bottom: 20px;">
+                <a href="{{ url($t['url']) }}" style="display: block; padding: 20px 10px; background: #f9f9f9; border-radius: 6px; text-decoration: none; border: 1px solid #eee; transition: all 0.2s;">
+                    <span class="glyphicon glyphicon-{{ $t['icon'] }}" style="font-size: 24px; color: #7b4397; margin-bottom: 10px;"></span>
+                    <h4 style="color: #333; margin: 0 0 5px;">{{ $t['title'] }}</h4>
+                    <p style="color: #777; font-size: 13px; margin: 0;">{{ $t['desc'] }}</p>
+                </a>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- Section: Why use QrGenerate? --}}
+    <div class="article-section">
+        <h2 class="text-center" style="margin-bottom: 40px;">Why use QrGenerate?</h2>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="tip-box" style="margin-top: 0;">
+                    <h4 style="color: #5b287a; font-weight: bold;"><span class="glyphicon glyphicon-ok-circle"></span> Free to use</h4>
+                    <p style="font-size: 14px;">No hidden fees, no subscriptions, and no limits on how many QR codes you can generate.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tip-box" style="margin-top: 0;">
+                    <h4 style="color: #5b287a; font-weight: bold;"><span class="glyphicon glyphicon-user"></span> No signup</h4>
+                    <p style="font-size: 14px;">Skip the registration forms. Generate and download your QR codes instantly without providing an email.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tip-box" style="margin-top: 0;">
+                    <h4 style="color: #5b287a; font-weight: bold;"><span class="glyphicon glyphicon-lock"></span> Privacy-first</h4>
+                    <p style="font-size: 14px;">Your data never leaves your device. The QR code is generated entirely in your browser using JavaScript.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="tip-box">
+                    <h4 style="color: #5b287a; font-weight: bold;"><span class="glyphicon glyphicon-picture"></span> Custom logo and colors</h4>
+                    <p style="font-size: 14px;">Brand your QR codes. Easily change the foreground and background colors and upload a center logo.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tip-box">
+                    <h4 style="color: #5b287a; font-weight: bold;"><span class="glyphicon glyphicon-print"></span> Print-ready</h4>
+                    <p style="font-size: 14px;">Download high-quality PNGs or scalable vector SVGs perfect for business cards, flyers, and billboards.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tip-box">
+                    <h4 style="color: #5b287a; font-weight: bold;"><span class="glyphicon glyphicon-flash"></span> Fast and simple</h4>
+                    <p style="font-size: 14px;">No complicated menus. See the preview update in real-time as you type and customize.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Section: How it works --}}
+    <div class="jumbotron" style="background: transparent; color: #333; box-shadow: none; border: 1px solid #ddd; padding-top: 40px; padding-bottom: 40px;">
+        <h2 class="text-center" style="margin-bottom: 40px; color: #5b287a; font-weight: bold;">How it works</h2>
+        <div class="row text-center">
+            <div class="col-md-3 col-sm-6">
+                <h1 style="color: #7b4397; font-size: 60px; margin: 0;">1</h1>
+                <h4>Choose QR type</h4>
+                <p class="text-muted">Select URL, WhatsApp, Wi-Fi, etc.</p>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <h1 style="color: #7b4397; font-size: 60px; margin: 0;">2</h1>
+                <h4>Enter your content</h4>
+                <p class="text-muted">Fill in the required information.</p>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <h1 style="color: #7b4397; font-size: 60px; margin: 0;">3</h1>
+                <h4>Customize design</h4>
+                <p class="text-muted">Pick colors and upload a logo.</p>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <h1 style="color: #7b4397; font-size: 60px; margin: 0;">4</h1>
+                <h4>Download or print</h4>
+                <p class="text-muted">Export in PNG or SVG format.</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- Section: FAQ --}}
+    @php
+        $homeFaqs = [
+            ['question' => 'Is QrGenerate really free?', 'answer' => 'Yes! You can generate as many QR codes as you want for free. There are no hidden limits, no trial periods, and no watermarks.'],
+            ['question' => 'Do these QR codes expire?', 'answer' => 'No. We generate static QR codes that encode your data directly into the image. They will work forever without depending on our servers.'],
+            ['question' => 'Why is this more private than other generators?', 'answer' => 'Most generators send your data to a server to create the image. QrGenerate uses modern browser technology to build the QR code directly on your device. We never see your URLs, passwords, or contact details.'],
+            ['question' => 'Can I use the QR codes for commercial purposes?', 'answer' => 'Absolutely. You have full commercial rights to use the generated QR codes on product packaging, marketing materials, TV ads, and more.'],
+            ['question' => 'Will my logo make the QR code unscannable?', 'answer' => 'We use the highest error correction level (Level H) which ensures your QR code remains fully readable even when up to 30% of it is covered by a logo.']
+        ];
+    @endphp
+    <div style="margin-bottom: 40px;">
+        @include('components.faq', ['faqs' => $homeFaqs, 'locale' => 'en'])
+    </div>
+
+    {{-- Section: Recent Articles --}}
+    @if(!empty($recentArticles) && count($recentArticles) > 0)
+    <div class="article-section">
+        <h2 class="text-center" style="margin-bottom: 40px;">Learn more about QR Codes</h2>
+        <div class="row">
+            @foreach($recentArticles as $article)
+                <div class="col-md-4">
+                    <div class="panel panel-default" style="border-color: #eee;">
+                        @if(!empty($article['cover']))
+                            <img src="{{ url($article['cover']) }}" alt="{{ $article['title'] }}" style="width: 100%; height: 160px; object-fit: cover; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                        @endif
+                        <div class="panel-body">
+                            <h4 style="margin-top: 0;"><a href="{{ url('/articles/' . $article['slug']) }}" style="color: #5b287a;">{{ $article['title'] }}</a></h4>
+                            <p class="text-muted" style="font-size: 13px;">{{ Str::limit($article['description'], 100) }}</p>
+                            <a href="{{ url('/articles/' . $article['slug']) }}" class="btn btn-default btn-sm">Read article</a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <div class="text-center" style="margin-top: 15px;">
+            <a href="{{ url('/articles') }}" class="btn btn-default">View all articles</a>
+        </div>
+    </div>
+    @endif
+
+    {{-- Final CTA --}}
+    <div class="jumbotron text-center" style="margin-top: 40px; margin-bottom: 0;">
+        <h2>Ready to create your QR code?</h2>
+        <p>It's fast, free, and completely private.</p>
+        <a href="#generator" class="btn btn-purple btn-lg" style="margin-top: 15px;">Create QR Code Now</a>
+    </div>
+
 @endsection
+
+@push('styles')
+<style>
+    /* Hover effects for grid cards */
+    #qr-types a:hover {
+        background: #f0e6f5;
+        border-color: #d1bfe0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+</style>
+@endpush
