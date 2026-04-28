@@ -6,18 +6,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    {{-- Google AdSense --}}
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2118765549976668"
+        crossorigin="anonymous"></script>
+
     {{-- Dynamic SEO Meta Tags --}}
     @include('components.seo', ['seo' => $seo ?? []])
 
     {{-- Google Analytics --}}
     @if(config('qrgenerate.analytics_id'))
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('qrgenerate.analytics_id') }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', '{{ config('qrgenerate.analytics_id') }}');
-    </script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('qrgenerate.analytics_id') }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', '{{ config('qrgenerate.analytics_id') }}');
+        </script>
     @endif
 
     {{-- Page-specific structured data --}}
