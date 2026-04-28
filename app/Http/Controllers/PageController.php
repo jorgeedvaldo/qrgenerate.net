@@ -14,6 +14,11 @@ class PageController extends Controller
                 'title' => 'Privacy Policy | QrGenerate',
                 'description' => 'Read the QrGenerate privacy policy. Learn how our browser-based QR code generator protects your data by keeping it on your device.',
                 'canonical' => url('/privacy-policy'),
+                'hreflang' => [
+                    'en' => url('/privacy-policy'),
+                    'pt' => url('/pt/politica-de-privacidade'),
+                    'x-default' => url('/privacy-policy'),
+                ],
             ]
         ]);
     }
@@ -26,6 +31,11 @@ class PageController extends Controller
                 'title' => 'Política de Privacidade | QrGenerate',
                 'description' => 'Leia a política de privacidade do QrGenerate. Saiba como o nosso gerador de QR Code no navegador protege os seus dados.',
                 'canonical' => url('/pt/politica-de-privacidade'),
+                'hreflang' => [
+                    'pt' => url('/pt/politica-de-privacidade'),
+                    'en' => url('/privacy-policy'),
+                    'x-default' => url('/privacy-policy'),
+                ],
             ]
         ]);
     }
@@ -38,6 +48,11 @@ class PageController extends Controller
                 'title' => 'Terms of Use | QrGenerate',
                 'description' => 'Terms of use for QrGenerate. Please read these terms carefully before using our free QR code generator.',
                 'canonical' => url('/terms-of-use'),
+                'hreflang' => [
+                    'en' => url('/terms-of-use'),
+                    'pt' => url('/pt/termos-de-uso'),
+                    'x-default' => url('/terms-of-use'),
+                ],
             ]
         ]);
     }
@@ -50,6 +65,11 @@ class PageController extends Controller
                 'title' => 'Termos de Uso | QrGenerate',
                 'description' => 'Termos de uso do QrGenerate. Por favor, leia com atenção antes de usar o nosso gerador de QR Code gratuito.',
                 'canonical' => url('/pt/termos-de-uso'),
+                'hreflang' => [
+                    'pt' => url('/pt/termos-de-uso'),
+                    'en' => url('/terms-of-use'),
+                    'x-default' => url('/terms-of-use'),
+                ],
             ]
         ]);
     }
@@ -62,6 +82,11 @@ class PageController extends Controller
                 'title' => 'About Us | QrGenerate',
                 'description' => 'Learn more about QrGenerate. Our mission is to provide a fast, private, and free QR code generator for everyone.',
                 'canonical' => url('/about'),
+                'hreflang' => [
+                    'en' => url('/about'),
+                    'pt' => url('/pt/sobre'),
+                    'x-default' => url('/about'),
+                ],
             ]
         ]);
     }
@@ -74,6 +99,11 @@ class PageController extends Controller
                 'title' => 'Sobre Nós | QrGenerate',
                 'description' => 'Saiba mais sobre o QrGenerate. A nossa missão é fornecer um gerador de QR Code rápido, privado e gratuito para todos.',
                 'canonical' => url('/pt/sobre'),
+                'hreflang' => [
+                    'pt' => url('/pt/sobre'),
+                    'en' => url('/about'),
+                    'x-default' => url('/about'),
+                ],
             ]
         ]);
     }
@@ -86,6 +116,11 @@ class PageController extends Controller
                 'title' => 'Contact Us | QrGenerate',
                 'description' => 'Get in touch with the QrGenerate team for feedback, support, or general inquiries.',
                 'canonical' => url('/contact'),
+                'hreflang' => [
+                    'en' => url('/contact'),
+                    'pt' => url('/pt/contacto'),
+                    'x-default' => url('/contact'),
+                ],
             ]
         ]);
     }
@@ -98,6 +133,11 @@ class PageController extends Controller
                 'title' => 'Contacto | QrGenerate',
                 'description' => 'Entre em contacto com a equipa do QrGenerate para feedback, suporte ou dúvidas gerais.',
                 'canonical' => url('/pt/contacto'),
+                'hreflang' => [
+                    'pt' => url('/pt/contacto'),
+                    'en' => url('/contact'),
+                    'x-default' => url('/contact'),
+                ],
             ]
         ]);
     }
