@@ -50,6 +50,18 @@
     .submit-btn { background: linear-gradient(135deg, #7b4397, #5b287a); color: #fff; border: none; border-radius: 10px; padding: 14px 36px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .2s; width: 100%; }
     .submit-btn:hover { opacity: .9; }
     .field-hint { font-size: 11px; color: #999; margin-top: 2px; }
+    .upload-widget { border: 2px dashed #c4a8e0; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all .2s; background: #faf8fc; position: relative; }
+    .upload-widget:hover, .upload-widget.dragover { border-color: #7b4397; background: #f3edf7; }
+    .upload-widget .upload-icon { font-size: 28px; margin-bottom: 6px; }
+    .upload-widget .upload-text { font-size: 13px; color: #7b4397; font-weight: 600; }
+    .upload-widget .upload-hint-text { font-size: 11px; color: #aaa; margin-top: 3px; }
+    .upload-preview { position: relative; display: none; }
+    .upload-preview img { width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; display: block; }
+    .upload-preview.cover-preview img { max-height: 80px; }
+    .upload-preview.logo-preview img { max-height: 80px; object-fit: contain; background: #f0f0f0; }
+    .btn-remove-img { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 99px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+    .url-toggle { font-size: 12px; color: #7b4397; cursor: pointer; text-decoration: underline; margin-top: 6px; display: inline-block; }
+    .url-input-wrap { margin-top: 8px; }
     @media(max-width:600px){ .item-row { grid-template-columns: 1fr; } }
 </style>
 @endpush
@@ -76,7 +88,7 @@
     </div>
     @endif
 
-    <form action="{{ route('menu.update', $menu->slug) }}" method="POST" id="menuForm">
+    <form action="{{ route('menu.update', $menu->slug) }}" method="POST" id="menuForm" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <input type="hidden" name="edit_token" value="{{ $menu->edit_token }}">
@@ -119,12 +131,44 @@
                 </div>
                 <div class="item-row" style="margin-bottom:14px;">
                     <div class="form-group">
-                        <label>URL da Logo</label>
-                        <input type="url" name="logo_url" class="form-control" value="{{ old('logo_url', $menu->logo_url) }}" maxlength="500">
+                        <label>Logo do Restaurante</label>
+                        @php $existingLogo = old('logo_url', $menu->logo_url); @endphp
+                        <div class="upload-widget" id="logoDropZone" onclick="document.getElementById('logo_file_input').click()" ondragover="handleDragOver(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'logo_file_input','logoPreview','logoDropZone','logo_url')">
+                            <div class="upload-preview logo-preview" id="logoPreview" style="{{ $existingLogo ? 'display:block' : '' }}">
+                                <img id="logoPreviewImg" src="{{ $existingLogo ?? '' }}" alt="logo preview">
+                                <button type="button" class="btn-remove-img" onclick="removeImage(event,'logo_file_input','logoPreview','logoDropZone','logo_url')">✕ Remover</button>
+                            </div>
+                            <div id="logoPlaceholder" style="{{ $existingLogo ? 'display:none' : '' }}">
+                                <div class="upload-icon">🖼️</div>
+                                <div class="upload-text">Clique ou arraste para enviar foto</div>
+                                <div class="upload-hint-text">PNG, JPG ou WEBP · máx. 2MB</div>
+                            </div>
+                        </div>
+                        <input type="file" id="logo_file_input" name="logo_file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewFile(this,'logoPreviewImg','logoPreview','logoDropZone','logo_url')">
+                        <span class="url-toggle" onclick="toggleUrlInput('logoUrlWrap')">ou cole um link (URL)</span>
+                        <div class="url-input-wrap" id="logoUrlWrap">
+                            <input type="url" name="logo_url" class="form-control" placeholder="https://..." value="{{ $existingLogo }}" maxlength="500" id="logo_url">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>URL da Capa</label>
-                        <input type="url" name="cover_url" class="form-control" value="{{ old('cover_url', $menu->cover_url) }}" maxlength="500">
+                        <label>Foto de Capa</label>
+                        @php $existingCover = old('cover_url', $menu->cover_url); @endphp
+                        <div class="upload-widget" id="coverDropZone" onclick="document.getElementById('cover_file_input').click()" ondragover="handleDragOver(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'cover_file_input','coverPreview','coverDropZone','cover_url')">
+                            <div class="upload-preview cover-preview" id="coverPreview" style="{{ $existingCover ? 'display:block' : '' }}">
+                                <img id="coverPreviewImg" src="{{ $existingCover ?? '' }}" alt="cover preview">
+                                <button type="button" class="btn-remove-img" onclick="removeImage(event,'cover_file_input','coverPreview','coverDropZone','cover_url')">✕ Remover</button>
+                            </div>
+                            <div id="coverPlaceholder" style="{{ $existingCover ? 'display:none' : '' }}">
+                                <div class="upload-icon">🌄</div>
+                                <div class="upload-text">Clique ou arraste para enviar foto</div>
+                                <div class="upload-hint-text">PNG, JPG ou WEBP · máx. 2MB</div>
+                            </div>
+                        </div>
+                        <input type="file" id="cover_file_input" name="cover_file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewFile(this,'coverPreviewImg','coverPreview','coverDropZone','cover_url')">
+                        <span class="url-toggle" onclick="toggleUrlInput('coverUrlWrap')">ou cole um link (URL)</span>
+                        <div class="url-input-wrap" id="coverUrlWrap">
+                            <input type="url" name="cover_url" class="form-control" placeholder="https://..." value="{{ $existingCover }}" maxlength="500" id="cover_url">
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -386,6 +430,55 @@ function reindexItems(sectionCard, si) {
 function toggleBadge(label) {
     const cb = label.querySelector('input[type=checkbox]');
     setTimeout(() => label.classList.toggle('active', cb.checked), 0);
+}
+
+function previewFile(input, imgId, previewId, dropZoneId, urlInputId) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById(imgId).src = e.target.result;
+        document.getElementById(previewId).style.display = 'block';
+        const placeholder = document.getElementById(dropZoneId).querySelector('[id$="Placeholder"]');
+        if (placeholder) placeholder.style.display = 'none';
+        const urlInput = document.getElementById(urlInputId);
+        if (urlInput) urlInput.value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage(event, fileInputId, previewId, dropZoneId, urlInputId) {
+    event.stopPropagation();
+    document.getElementById(fileInputId).value = '';
+    document.getElementById(previewId).style.display = 'none';
+    const placeholder = document.getElementById(dropZoneId).querySelector('[id$="Placeholder"]');
+    if (placeholder) placeholder.style.display = '';
+    const urlInput = document.getElementById(urlInputId);
+    if (urlInput) urlInput.value = '';
+}
+
+function toggleUrlInput(wrapId) {
+    const wrap = document.getElementById(wrapId);
+    wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+function handleDragOver(e, zone) {
+    e.preventDefault();
+    zone.classList.add('dragover');
+}
+function handleDragLeave(zone) {
+    zone.classList.remove('dragover');
+}
+function handleDrop(e, fileInputId, previewId, dropZoneId) {
+    e.preventDefault();
+    handleDragLeave(document.getElementById(dropZoneId));
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const input = document.getElementById(fileInputId);
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
 }
 
 document.getElementById('menuForm').addEventListener('submit', function(e) {

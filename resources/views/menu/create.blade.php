@@ -52,13 +52,19 @@ $t = [
         'error_title'   => 'Por favor corrija os erros abaixo:',
         'section_err'   => 'Cada seção precisa ter pelo menos um item.',
         'section_min'   => 'O cardápio precisa ter pelo menos uma seção.',
-        'vegan'         => '🌿 Vegano',
-        'veggie'        => '🥗 Vegetariano',
-        'gluten'        => '🌾 Sem Glúten',
-        'spicy'         => '🌶️ Picante',
-        'lang_switch'   => '🇬🇧 See in English',
-        'lang_switch_url'=> route('menu.create.en'),
-        'required'      => ' *',
+        'vegan'              => '🌿 Vegano',
+        'veggie'             => '🥗 Vegetariano',
+        'gluten'             => '🌾 Sem Glúten',
+        'spicy'              => '🌶️ Picante',
+        'lang_switch'        => '🇬🇧 See in English',
+        'lang_switch_url'    => route('menu.create.en'),
+        'required'           => ' *',
+        'logo_upload_label'  => 'Logo do Restaurante',
+        'cover_upload_label' => 'Foto de Capa',
+        'upload_click'       => 'Clique ou arraste para enviar foto',
+        'upload_hint'        => 'PNG, JPG ou WEBP · máx. 2MB',
+        'or_url'             => 'ou cole um link (URL)',
+        'remove_img'         => '✕ Remover',
     ],
     'en' => [
         'hero_title'    => 'Create Your Restaurant\'s Digital Menu',
@@ -111,9 +117,15 @@ $t = [
         'veggie'        => '🥗 Vegetarian',
         'gluten'        => '🌾 Gluten-Free',
         'spicy'         => '🌶️ Spicy',
-        'lang_switch'   => '🇧🇷 Ver em Português',
-        'lang_switch_url'=> route('menu.create.pt'),
-        'required'      => ' *',
+        'lang_switch'        => '🇧🇷 Ver em Português',
+        'lang_switch_url'    => route('menu.create.pt'),
+        'required'           => ' *',
+        'logo_upload_label'  => 'Restaurant Logo',
+        'cover_upload_label' => 'Cover Photo',
+        'upload_click'       => 'Click or drag to upload a photo',
+        'upload_hint'        => 'PNG, JPG or WEBP · max 2MB',
+        'or_url'             => 'or paste an image URL',
+        'remove_img'         => '✕ Remove',
     ],
 ];
 $i = $t[$lang];
@@ -187,6 +199,18 @@ $i = $t[$lang];
     .submit-btn { background: linear-gradient(135deg, #7b4397, #5b287a); color: #fff; border: none; border-radius: 10px; padding: 14px 36px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .2s; width: 100%; }
     .submit-btn:hover { opacity: .9; }
     .field-hint { font-size: 11px; color: #999; margin-top: 2px; }
+    .upload-widget { border: 2px dashed #c4a8e0; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all .2s; background: #faf8fc; position: relative; }
+    .upload-widget:hover, .upload-widget.dragover { border-color: #7b4397; background: #f3edf7; }
+    .upload-widget .upload-icon { font-size: 28px; margin-bottom: 6px; }
+    .upload-widget .upload-text { font-size: 13px; color: #7b4397; font-weight: 600; }
+    .upload-widget .upload-hint-text { font-size: 11px; color: #aaa; margin-top: 3px; }
+    .upload-preview { position: relative; display: none; }
+    .upload-preview img { width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; display: block; }
+    .upload-preview.cover-preview img { max-height: 80px; }
+    .upload-preview.logo-preview img { max-height: 80px; object-fit: contain; background: #f0f0f0; }
+    .btn-remove-img { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 99px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+    .url-toggle { font-size: 12px; color: #7b4397; cursor: pointer; text-decoration: underline; margin-top: 6px; display: inline-block; }
+    .url-input-wrap { display: none; margin-top: 8px; }
     @media(max-width:600px){ .item-row { grid-template-columns: 1fr; } .color-row { gap: 10px; } }
 </style>
 @endpush
@@ -206,7 +230,7 @@ $i = $t[$lang];
         <p style="color:#777; font-size:15px; margin:0;">{{ $i['hero_sub'] }}</p>
     </div>
 
-    <form action="{{ route('menu.store') }}" method="POST" id="menuForm">
+    <form action="{{ route('menu.store') }}" method="POST" id="menuForm" enctype="multipart/form-data">
         @csrf
 
         @if($errors->any())
@@ -260,13 +284,42 @@ $i = $t[$lang];
                 </div>
                 <div class="item-row" style="margin-bottom:14px;">
                     <div class="form-group">
-                        <label>{{ $i['logo_label'] }}</label>
-                        <input type="url" name="logo_url" class="form-control" placeholder="https://..." value="{{ old('logo_url') }}" maxlength="500">
-                        <div class="field-hint">{{ $i['url_hint'] }}</div>
+                        <label>{{ $i['logo_upload_label'] }}</label>
+                        <div class="upload-widget" id="logoDropZone" onclick="document.getElementById('logo_file_input').click()" ondragover="handleDragOver(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'logo_file_input','logoPreview','logoDropZone')">
+                            <div class="upload-preview logo-preview" id="logoPreview">
+                                <img id="logoPreviewImg" src="" alt="logo preview">
+                                <button type="button" class="btn-remove-img" onclick="removeImage(event,'logo_file_input','logoPreview','logoDropZone','logo_url')">{{ $i['remove_img'] }}</button>
+                            </div>
+                            <div id="logoPlaceholder">
+                                <div class="upload-icon">🖼️</div>
+                                <div class="upload-text">{{ $i['upload_click'] }}</div>
+                                <div class="upload-hint-text">{{ $i['upload_hint'] }}</div>
+                            </div>
+                        </div>
+                        <input type="file" id="logo_file_input" name="logo_file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewFile(this,'logoPreviewImg','logoPreview','logoDropZone','logo_url')">
+                        <span class="url-toggle" onclick="toggleUrlInput('logoUrlWrap')">{{ $i['or_url'] }}</span>
+                        <div class="url-input-wrap" id="logoUrlWrap">
+                            <input type="url" name="logo_url" class="form-control" placeholder="https://..." value="{{ old('logo_url') }}" maxlength="500" id="logo_url">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>{{ $i['cover_label'] }}</label>
-                        <input type="url" name="cover_url" class="form-control" placeholder="https://..." value="{{ old('cover_url') }}" maxlength="500">
+                        <label>{{ $i['cover_upload_label'] }}</label>
+                        <div class="upload-widget" id="coverDropZone" onclick="document.getElementById('cover_file_input').click()" ondragover="handleDragOver(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'cover_file_input','coverPreview','coverDropZone')">
+                            <div class="upload-preview cover-preview" id="coverPreview">
+                                <img id="coverPreviewImg" src="" alt="cover preview">
+                                <button type="button" class="btn-remove-img" onclick="removeImage(event,'cover_file_input','coverPreview','coverDropZone','cover_url')">{{ $i['remove_img'] }}</button>
+                            </div>
+                            <div id="coverPlaceholder">
+                                <div class="upload-icon">🌄</div>
+                                <div class="upload-text">{{ $i['upload_click'] }}</div>
+                                <div class="upload-hint-text">{{ $i['upload_hint'] }}</div>
+                            </div>
+                        </div>
+                        <input type="file" id="cover_file_input" name="cover_file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewFile(this,'coverPreviewImg','coverPreview','coverDropZone','cover_url')">
+                        <span class="url-toggle" onclick="toggleUrlInput('coverUrlWrap')">{{ $i['or_url'] }}</span>
+                        <div class="url-input-wrap" id="coverUrlWrap">
+                            <input type="url" name="cover_url" class="form-control" placeholder="https://..." value="{{ old('cover_url') }}" maxlength="500" id="cover_url">
+                        </div>
                     </div>
                 </div>
                 <div style="margin-top:4px;">
@@ -474,6 +527,54 @@ function reindexItems(sectionCard, si) {
 function toggleBadge(label) {
     const cb = label.querySelector('input[type=checkbox]');
     setTimeout(() => label.classList.toggle('active', cb.checked), 0);
+}
+
+function previewFile(input, imgId, previewId, dropZoneId, urlInputId) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById(imgId).src = e.target.result;
+        document.getElementById(previewId).style.display = 'block';
+        document.getElementById(dropZoneId).querySelector('[id$="Placeholder"]') &&
+            (document.getElementById(dropZoneId).querySelector('[id$="Placeholder"]').style.display = 'none');
+        // clear URL input since file takes priority
+        const urlInput = document.getElementById(urlInputId);
+        if (urlInput) urlInput.value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage(event, fileInputId, previewId, dropZoneId, urlInputId) {
+    event.stopPropagation();
+    document.getElementById(fileInputId).value = '';
+    document.getElementById(previewId).style.display = 'none';
+    const placeholder = document.getElementById(dropZoneId).querySelector('[id$="Placeholder"]');
+    if (placeholder) placeholder.style.display = '';
+}
+
+function toggleUrlInput(wrapId) {
+    const wrap = document.getElementById(wrapId);
+    wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
+}
+
+function handleDragOver(e, zone) {
+    e.preventDefault();
+    zone.classList.add('dragover');
+}
+function handleDragLeave(zone) {
+    zone.classList.remove('dragover');
+}
+function handleDrop(e, fileInputId, previewId, dropZoneId) {
+    e.preventDefault();
+    handleDragLeave(document.getElementById(dropZoneId));
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const input = document.getElementById(fileInputId);
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
 }
 
 document.getElementById('menuForm').addEventListener('submit', function(e) {
