@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\MenuSection;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MenuController extends Controller
@@ -95,7 +96,9 @@ class MenuController extends Controller
         $data = $request->validate([
             'restaurant_name'          => 'required|string|max:100',
             'description'              => 'nullable|string|max:500',
+            'logo_file'                => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'logo_url'                 => 'nullable|url|max:500',
+            'cover_file'               => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'cover_url'                => 'nullable|url|max:500',
             'phone'                    => 'nullable|string|max:30',
             'address'                  => 'nullable|string|max:200',
@@ -116,13 +119,15 @@ class MenuController extends Controller
             'sections.*.items.*.badges'      => 'nullable|array',
         ]);
 
+        $slug = Menu::generateUniqueSlug($data['restaurant_name']);
+
         $menu = Menu::create([
-            'slug'            => Menu::generateUniqueSlug($data['restaurant_name']),
+            'slug'            => $slug,
             'edit_token'      => Str::uuid()->toString(),
             'restaurant_name' => $data['restaurant_name'],
             'description'     => $data['description'] ?? null,
-            'logo_url'        => $data['logo_url'] ?? null,
-            'cover_url'       => $data['cover_url'] ?? null,
+            'logo_url'        => $this->resolveImageUrl($request, 'logo_file', 'logo_url', $slug),
+            'cover_url'       => $this->resolveImageUrl($request, 'cover_file', 'cover_url', $slug),
             'phone'           => $data['phone'] ?? null,
             'address'         => $data['address'] ?? null,
             'website'         => $data['website'] ?? null,
@@ -197,7 +202,9 @@ class MenuController extends Controller
         $data = $request->validate([
             'restaurant_name'          => 'required|string|max:100',
             'description'              => 'nullable|string|max:500',
+            'logo_file'                => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'logo_url'                 => 'nullable|url|max:500',
+            'cover_file'               => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'cover_url'                => 'nullable|url|max:500',
             'phone'                    => 'nullable|string|max:30',
             'address'                  => 'nullable|string|max:200',
@@ -221,8 +228,8 @@ class MenuController extends Controller
         $menu->update([
             'restaurant_name' => $data['restaurant_name'],
             'description'     => $data['description'] ?? null,
-            'logo_url'        => $data['logo_url'] ?? null,
-            'cover_url'       => $data['cover_url'] ?? null,
+            'logo_url'        => $this->resolveImageUrl($request, 'logo_file', 'logo_url', $menu->slug, $menu->logo_url),
+            'cover_url'       => $this->resolveImageUrl($request, 'cover_file', 'cover_url', $menu->slug, $menu->cover_url),
             'phone'           => $data['phone'] ?? null,
             'address'         => $data['address'] ?? null,
             'website'         => $data['website'] ?? null,
@@ -266,5 +273,25 @@ class MenuController extends Controller
                 ]);
             }
         }
+    }
+
+    private function resolveImageUrl(
+        Request $request,
+        string $fileInput,
+        string $urlInput,
+        string $slug,
+        ?string $existing = null
+    ): ?string {
+        if ($request->hasFile($fileInput) && $request->file($fileInput)->isValid()) {
+            // Delete previously uploaded file (not external URLs)
+            if ($existing && str_starts_with($existing, '/storage/')) {
+                Storage::disk('public')->delete(ltrim(str_replace('/storage', '', $existing), '/'));
+            }
+            $path = $request->file($fileInput)->store("menus/{$slug}", 'public');
+            return '/storage/' . $path;
+        }
+
+        $url = $request->input($urlInput);
+        return $url ?: $existing;
     }
 }
