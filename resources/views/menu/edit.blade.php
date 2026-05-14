@@ -50,6 +50,25 @@
     .submit-btn { background: linear-gradient(135deg, #7b4397, #5b287a); color: #fff; border: none; border-radius: 10px; padding: 14px 36px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .2s; width: 100%; }
     .submit-btn:hover { opacity: .9; }
     .field-hint { font-size: 11px; color: #999; margin-top: 2px; }
+    .upload-widget { border: 2px dashed #c4a8e0; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all .2s; background: #faf8fc; position: relative; }
+    .upload-widget:hover, .upload-widget.dragover { border-color: #7b4397; background: #f3edf7; }
+    .upload-widget .upload-icon { font-size: 28px; margin-bottom: 6px; }
+    .upload-widget .upload-text { font-size: 13px; color: #7b4397; font-weight: 600; }
+    .upload-widget .upload-hint-text { font-size: 11px; color: #aaa; margin-top: 3px; }
+    .upload-preview { position: relative; display: none; }
+    .upload-preview img { width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; display: block; }
+    .upload-preview.cover-preview img { max-height: 80px; }
+    .upload-preview.logo-preview img { max-height: 80px; object-fit: contain; background: #f0f0f0; }
+    .btn-remove-img { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 99px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+    .url-toggle { font-size: 12px; color: #7b4397; cursor: pointer; text-decoration: underline; margin-top: 6px; display: inline-block; }
+    .url-input-wrap { display: none; margin-top: 8px; }
+    .item-upload-widget { border: 2px dashed #c4a8e0; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all .2s; background: #faf8fc; position: relative; }
+    .item-upload-widget:hover, .item-upload-widget.dragover { border-color: #7b4397; background: #f3edf7; }
+    .item-upload-widget .upload-icon { font-size: 18px; margin-bottom: 3px; }
+    .item-upload-widget .upload-text { font-size: 11px; color: #7b4397; font-weight: 600; }
+    .item-upload-widget .upload-hint-text { font-size: 10px; color: #aaa; margin-top: 2px; }
+    .item-upload-widget .upload-preview { position: relative; display: none; }
+    .item-upload-widget .upload-preview img { width: 100%; max-height: 80px; object-fit: cover; border-radius: 6px; display: block; }
     @media(max-width:600px){ .item-row { grid-template-columns: 1fr; } }
 </style>
 @endpush
@@ -76,7 +95,7 @@
     </div>
     @endif
 
-    <form action="{{ route('menu.update', $menu->slug) }}" method="POST" id="menuForm">
+    <form action="{{ route('menu.update', $menu->slug) }}" method="POST" id="menuForm" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <input type="hidden" name="edit_token" value="{{ $menu->edit_token }}">
@@ -117,14 +136,51 @@
                         <input type="url" name="website" class="form-control" value="{{ old('website', $menu->website) }}" maxlength="200">
                     </div>
                 </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>E-mail de Contato Público</label>
+                    <input type="email" name="contact_email" class="form-control" placeholder="contato@seurestaurante.com.br" value="{{ old('contact_email', $menu->contact_email) }}" maxlength="200">
+                    <div class="field-hint">Visível no cardápio público (opcional)</div>
+                </div>
                 <div class="item-row" style="margin-bottom:14px;">
                     <div class="form-group">
-                        <label>URL da Logo</label>
-                        <input type="url" name="logo_url" class="form-control" value="{{ old('logo_url', $menu->logo_url) }}" maxlength="500">
+                        <label>Logo do Restaurante</label>
+                        @php $existingLogo = old('logo_url', $menu->logo_url); @endphp
+                        <div class="upload-widget" id="logoDropZone" onclick="document.getElementById('logo_file_input').click()" ondragover="handleDragOver(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'logo_file_input','logoPreview','logoDropZone','logo_url')">
+                            <div class="upload-preview logo-preview" id="logoPreview" style="{{ $existingLogo ? 'display:block' : '' }}">
+                                <img id="logoPreviewImg" src="{{ $existingLogo ?? '' }}" alt="logo preview">
+                                <button type="button" class="btn-remove-img" onclick="removeImage(event,'logo_file_input','logoPreview','logoDropZone','logo_url')">✕ Remover</button>
+                            </div>
+                            <div id="logoPlaceholder" style="{{ $existingLogo ? 'display:none' : '' }}">
+                                <div class="upload-icon">🖼️</div>
+                                <div class="upload-text">Clique ou arraste para enviar foto</div>
+                                <div class="upload-hint-text">PNG, JPG ou WEBP · máx. 2MB</div>
+                            </div>
+                        </div>
+                        <input type="file" id="logo_file_input" name="logo_file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewFile(this,'logoPreviewImg','logoPreview','logoDropZone','logo_url')">
+                        <span class="url-toggle" onclick="toggleUrlInput('logoUrlWrap')">ou cole um link (URL)</span>
+                        <div class="url-input-wrap" id="logoUrlWrap">
+                            <input type="url" name="logo_url" class="form-control" placeholder="https://..." value="{{ $existingLogo }}" maxlength="500" id="logo_url">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>URL da Capa</label>
-                        <input type="url" name="cover_url" class="form-control" value="{{ old('cover_url', $menu->cover_url) }}" maxlength="500">
+                        <label>Foto de Capa</label>
+                        @php $existingCover = old('cover_url', $menu->cover_url); @endphp
+                        <div class="upload-widget" id="coverDropZone" onclick="document.getElementById('cover_file_input').click()" ondragover="handleDragOver(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'cover_file_input','coverPreview','coverDropZone','cover_url')">
+                            <div class="upload-preview cover-preview" id="coverPreview" style="{{ $existingCover ? 'display:block' : '' }}">
+                                <img id="coverPreviewImg" src="{{ $existingCover ?? '' }}" alt="cover preview">
+                                <button type="button" class="btn-remove-img" onclick="removeImage(event,'cover_file_input','coverPreview','coverDropZone','cover_url')">✕ Remover</button>
+                            </div>
+                            <div id="coverPlaceholder" style="{{ $existingCover ? 'display:none' : '' }}">
+                                <div class="upload-icon">🌄</div>
+                                <div class="upload-text">Clique ou arraste para enviar foto</div>
+                                <div class="upload-hint-text">PNG, JPG ou WEBP · máx. 2MB</div>
+                            </div>
+                        </div>
+                        <input type="file" id="cover_file_input" name="cover_file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewFile(this,'coverPreviewImg','coverPreview','coverDropZone','cover_url')">
+                        <span class="url-toggle" onclick="toggleUrlInput('coverUrlWrap')">ou cole um link (URL)</span>
+                        <div class="url-input-wrap" id="coverUrlWrap">
+                            <input type="url" name="cover_url" class="form-control" placeholder="https://..." value="{{ $existingCover }}" maxlength="500" id="cover_url">
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -179,8 +235,24 @@
                                         <input type="text" name="sections[{{ $si }}][items][{{ $ii }}][description]" class="form-control" value="{{ $item->description }}" maxlength="400">
                                     </div>
                                     <div class="form-group" style="margin-bottom:10px;">
-                                        <label>Foto do Item (URL)</label>
-                                        <input type="url" name="sections[{{ $si }}][items][{{ $ii }}][image_url]" class="form-control" value="{{ $item->image_url }}" maxlength="500">
+                                        <label>Foto do Item</label>
+                                        @php $existingItemImg = $item->image_url; @endphp
+                                        <div class="item-upload-widget" onclick="this.nextElementSibling.click()" ondragover="itemHandleDragOver(event,this)" ondragleave="itemHandleDragLeave(this)" ondrop="itemHandleDrop(event,this)">
+                                            <div class="upload-preview" style="{{ $existingItemImg ? 'display:block' : '' }}">
+                                                <img src="{{ $existingItemImg ?? '' }}" alt="item preview">
+                                                <button type="button" class="btn-remove-img" onclick="itemRemoveImage(event,this)">✕ Remover</button>
+                                            </div>
+                                            <div class="upload-placeholder" style="{{ $existingItemImg ? 'display:none' : '' }}">
+                                                <div class="upload-icon">🍽️</div>
+                                                <div class="upload-text">Clique ou arraste foto</div>
+                                                <div class="upload-hint-text">PNG, JPG · máx. 2MB</div>
+                                            </div>
+                                        </div>
+                                        <input type="file" name="sections[{{ $si }}][items][{{ $ii }}][image_file]" class="item-file-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                                        <span class="url-toggle" onclick="itemToggleUrl(this)">ou cole URL</span>
+                                        <div class="url-input-wrap" style="{{ $existingItemImg && !str_starts_with($existingItemImg, '/storage/') ? 'display:block' : '' }}">
+                                            <input type="url" name="sections[{{ $si }}][items][{{ $ii }}][image_url]" class="form-control" value="{{ $item->image_url }}" maxlength="500" placeholder="https://...">
+                                        </div>
                                     </div>
                                     <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; margin-bottom:8px;">
                                         <div class="toggle-group">
@@ -229,6 +301,16 @@
             </div>
         </div>
 
+        <div class="builder-card">
+            <div class="builder-card-body">
+                <div class="form-group">
+                    <label>E-mail de Recuperação (privado)</label>
+                    <input type="email" name="recovery_email" class="form-control" placeholder="seuemail@exemplo.com" value="{{ old('recovery_email', $menu->recovery_email) }}" maxlength="200">
+                    <div class="field-hint">🔒 Se perder o link de edição, enviaremos aqui — nunca exibido publicamente</div>
+                </div>
+            </div>
+        </div>
+
         <button type="submit" class="submit-btn">💾 Salvar Alterações</button>
         <div style="text-align:center; margin-top:12px;">
             <a href="{{ $menu->publicUrl() }}" target="_blank" style="color:#7b4397; font-size:13px;">👁️ Ver cardápio público</a>
@@ -253,8 +335,23 @@
             <input type="text" name="__DESC__" class="form-control" placeholder="Ingredientes, modo de preparo..." maxlength="400">
         </div>
         <div class="form-group" style="margin-bottom:10px;">
-            <label>Foto do Item (URL)</label>
-            <input type="url" name="__IMG__" class="form-control" placeholder="https://..." maxlength="500">
+            <label>Foto do Item</label>
+            <div class="item-upload-widget" onclick="this.nextElementSibling.click()" ondragover="itemHandleDragOver(event,this)" ondragleave="itemHandleDragLeave(this)" ondrop="itemHandleDrop(event,this)">
+                <div class="upload-preview">
+                    <img src="" alt="item preview">
+                    <button type="button" class="btn-remove-img" onclick="itemRemoveImage(event,this)">✕ Remover</button>
+                </div>
+                <div class="upload-placeholder">
+                    <div class="upload-icon">🍽️</div>
+                    <div class="upload-text">Clique ou arraste foto</div>
+                    <div class="upload-hint-text">PNG, JPG · máx. 2MB</div>
+                </div>
+            </div>
+            <input type="file" name="__IMG_FILE__" class="item-file-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+            <span class="url-toggle" onclick="itemToggleUrl(this)">ou cole URL</span>
+            <div class="url-input-wrap">
+                <input type="url" name="__IMG__" class="form-control" placeholder="https://..." maxlength="500">
+            </div>
         </div>
         <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; margin-bottom:8px;">
             <div class="toggle-group">
@@ -357,13 +454,14 @@ function addItem(btn) {
     const tpl = document.getElementById('itemTemplate').content.cloneNode(true);
     const div = tpl.querySelector('.item-card');
     div.innerHTML = div.innerHTML
-        .replace(/__NAME__/g,  `sections[${si}][items][${ii}][name]`)
-        .replace(/__PRICE__/g, `sections[${si}][items][${ii}][price]`)
-        .replace(/__DESC__/g,  `sections[${si}][items][${ii}][description]`)
-        .replace(/__IMG__/g,   `sections[${si}][items][${ii}][image_url]`)
-        .replace(/__AVAIL__/g, `sections[${si}][items][${ii}][is_available]`)
-        .replace(/__FEAT__/g,  `sections[${si}][items][${ii}][is_featured]`)
-        .replace(/__BADGES__/g,`sections[${si}][items][${ii}][badges][]`);
+        .replace(/__NAME__/g,     `sections[${si}][items][${ii}][name]`)
+        .replace(/__PRICE__/g,    `sections[${si}][items][${ii}][price]`)
+        .replace(/__DESC__/g,     `sections[${si}][items][${ii}][description]`)
+        .replace(/__IMG_FILE__/g, `sections[${si}][items][${ii}][image_file]`)
+        .replace(/__IMG__/g,      `sections[${si}][items][${ii}][image_url]`)
+        .replace(/__AVAIL__/g,    `sections[${si}][items][${ii}][is_available]`)
+        .replace(/__FEAT__/g,     `sections[${si}][items][${ii}][is_featured]`)
+        .replace(/__BADGES__/g,   `sections[${si}][items][${ii}][badges][]`);
     container.appendChild(div);
     div.querySelector('input').focus();
 }
@@ -386,6 +484,126 @@ function reindexItems(sectionCard, si) {
 function toggleBadge(label) {
     const cb = label.querySelector('input[type=checkbox]');
     setTimeout(() => label.classList.toggle('active', cb.checked), 0);
+}
+
+function previewFile(input, imgId, previewId, dropZoneId, urlInputId) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById(imgId).src = e.target.result;
+        document.getElementById(previewId).style.display = 'block';
+        const placeholder = document.getElementById(dropZoneId).querySelector('[id$="Placeholder"]');
+        if (placeholder) placeholder.style.display = 'none';
+        const urlInput = document.getElementById(urlInputId);
+        if (urlInput) urlInput.value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage(event, fileInputId, previewId, dropZoneId, urlInputId) {
+    event.stopPropagation();
+    document.getElementById(fileInputId).value = '';
+    document.getElementById(previewId).style.display = 'none';
+    const placeholder = document.getElementById(dropZoneId).querySelector('[id$="Placeholder"]');
+    if (placeholder) placeholder.style.display = '';
+    const urlInput = document.getElementById(urlInputId);
+    if (urlInput) urlInput.value = '';
+}
+
+function toggleUrlInput(wrapIdOrEl) {
+    const wrap = (typeof wrapIdOrEl === 'string') ? document.getElementById(wrapIdOrEl) : wrapIdOrEl;
+    wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
+}
+
+function handleDragOver(e, zone) {
+    e.preventDefault();
+    zone.classList.add('dragover');
+}
+function handleDragLeave(zone) {
+    zone.classList.remove('dragover');
+}
+function handleDrop(e, fileInputId, previewId, dropZoneId) {
+    e.preventDefault();
+    handleDragLeave(document.getElementById(dropZoneId));
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const input = document.getElementById(fileInputId);
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
+}
+
+// Item upload widget helpers (delegated)
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('item-file-input')) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const widget = e.target.previousElementSibling;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const preview = widget.querySelector('.upload-preview');
+            preview.querySelector('img').src = ev.target.result;
+            preview.style.display = 'block';
+            widget.querySelector('.upload-placeholder').style.display = 'none';
+            const urlWrap = e.target.nextElementSibling.nextElementSibling;
+            if (urlWrap) { const urlIn = urlWrap.querySelector('input[type=url]'); if (urlIn) urlIn.value = ''; }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+document.addEventListener('dragover', function(e) {
+    const widget = e.target.closest('.item-upload-widget');
+    if (widget) { e.preventDefault(); widget.classList.add('dragover'); }
+});
+document.addEventListener('dragleave', function(e) {
+    const widget = e.target.closest('.item-upload-widget');
+    if (widget && !widget.contains(e.relatedTarget)) widget.classList.remove('dragover');
+});
+document.addEventListener('drop', function(e) {
+    const widget = e.target.closest('.item-upload-widget');
+    if (!widget) return;
+    e.preventDefault();
+    widget.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const input = widget.nextElementSibling;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
+});
+
+function itemRemoveImage(event, btn) {
+    event.stopPropagation();
+    const widget = btn.closest('.item-upload-widget');
+    const preview = widget.querySelector('.upload-preview');
+    preview.style.display = 'none';
+    preview.querySelector('img').src = '';
+    widget.querySelector('.upload-placeholder').style.display = '';
+    const fileInput = widget.nextElementSibling;
+    if (fileInput && fileInput.classList.contains('item-file-input')) fileInput.value = '';
+}
+
+function itemToggleUrl(toggleEl) {
+    const wrap = toggleEl.nextElementSibling;
+    toggleUrlInput(wrap);
+}
+
+function itemHandleDragOver(e, widget) { e.preventDefault(); widget.classList.add('dragover'); }
+function itemHandleDragLeave(widget) { widget.classList.remove('dragover'); }
+function itemHandleDrop(e, widget) {
+    e.preventDefault();
+    widget.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const input = widget.nextElementSibling;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
 }
 
 document.getElementById('menuForm').addEventListener('submit', function(e) {

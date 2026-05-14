@@ -12,6 +12,7 @@ class Menu extends Model
         'slug', 'edit_token', 'restaurant_name', 'description',
         'logo_url', 'cover_url', 'phone', 'address', 'website',
         'whatsapp', 'instagram', 'facebook',
+        'contact_email', 'recovery_email',
         'primary_color', 'accent_color', 'is_active',
     ];
 

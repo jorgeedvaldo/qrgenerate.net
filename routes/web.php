@@ -83,6 +83,12 @@ Route::get('/menu/{slug}/edit', [MenuController::class, 'editEn'])->name('menu.e
 Route::put('/menu/{slug}', [MenuController::class, 'update'])->name('menu.update')
     ->where('slug', '[a-z0-9\-]+');
 
+// Link recovery — bilingual (must be before {slug} catch-all)
+Route::get('/menu/recuperar', [MenuController::class, 'recoverForm'])->name('menu.recover.pt');
+Route::post('/menu/recuperar', [MenuController::class, 'recoverSend'])->name('menu.recover.send.pt');
+Route::get('/menu/recover', [MenuController::class, 'recoverForm'])->name('menu.recover.en');
+Route::post('/menu/recover', [MenuController::class, 'recoverSend'])->name('menu.recover.send.en');
+
 // Public menu page
 Route::get('/menu/{slug}', [MenuController::class, 'show'])->name('menu.show')
     ->where('slug', '[a-z0-9\-]+');

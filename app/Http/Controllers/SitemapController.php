@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use App\Services\ArticleService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
@@ -73,6 +74,20 @@ class SitemapController extends Controller
         $urls[] = ['loc' => "{$baseUrl}/pt/gerador-de-cardapio-digital",  'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.9'];
         $urls[] = ['loc' => "{$baseUrl}/menu/create",                     'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.8'];
         $urls[] = ['loc' => "{$baseUrl}/cardapio/criar",                  'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.8'];
+
+        // ── Public menu pages ──
+        Menu::where('is_active', true)
+            ->select('slug', 'updated_at')
+            ->orderByDesc('updated_at')
+            ->limit(5000)
+            ->each(function (Menu $menu) use (&$urls, $baseUrl) {
+                $urls[] = [
+                    'loc'        => "{$baseUrl}/menu/{$menu->slug}",
+                    'lastmod'    => $menu->updated_at?->toDateString() ?? date('Y-m-d'),
+                    'changefreq' => 'weekly',
+                    'priority'   => '0.6',
+                ];
+            });
 
         // ── Article index pages ──
         $urls[] = ['loc' => "{$baseUrl}/articles", 'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.7'];
