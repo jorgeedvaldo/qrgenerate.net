@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\MenuSection;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -106,6 +107,8 @@ class MenuController extends Controller
             'whatsapp'                 => 'nullable|string|max:30',
             'instagram'                => 'nullable|string|max:100',
             'facebook'                 => 'nullable|string|max:100',
+            'contact_email'            => 'nullable|email|max:200',
+            'recovery_email'           => 'nullable|email|max:200',
             'primary_color'            => 'nullable|string|max:7',
             'accent_color'             => 'nullable|string|max:7',
             'sections'                 => 'required|array|min:1',
@@ -116,6 +119,7 @@ class MenuController extends Controller
             'sections.*.items.*.description' => 'nullable|string|max:400',
             'sections.*.items.*.price'       => 'nullable|numeric|min:0|max:99999',
             'sections.*.items.*.image_url'   => 'nullable|url|max:500',
+            'sections.*.items.*.image_file'  => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'sections.*.items.*.badges'      => 'nullable|array',
         ]);
 
@@ -134,11 +138,25 @@ class MenuController extends Controller
             'whatsapp'        => $data['whatsapp'] ?? null,
             'instagram'       => $data['instagram'] ?? null,
             'facebook'        => $data['facebook'] ?? null,
+            'contact_email'   => $data['contact_email'] ?? null,
+            'recovery_email'  => $data['recovery_email'] ?? null,
             'primary_color'   => $data['primary_color'] ?? '#d97706',
             'accent_color'    => $data['accent_color'] ?? '#92400e',
         ]);
 
-        $this->saveSections($menu, $data['sections'] ?? []);
+        $this->saveSections($menu, $data['sections'] ?? [], $request);
+
+        if ($menu->recovery_email) {
+            $editLink = $menu->editUrl();
+            $restaurantName = $menu->restaurant_name;
+            Mail::raw(
+                "Olá!\n\nSeu cardápio digital foi criado com sucesso no QRGenerate.net.\n\nGuarde o link abaixo para editar seu cardápio quando precisar:\n\n{$editLink}\n\nNão compartilhe este link publicamente – qualquer pessoa com ele pode editar seu cardápio.\n\nAtenciosamente,\nEquipe QRGenerate.net",
+                function ($msg) use ($menu) {
+                    $msg->to($menu->recovery_email)
+                        ->subject('Seu link de edição do cardápio – ' . $menu->restaurant_name);
+                }
+            );
+        }
 
         return redirect()->route('menu.success', ['slug' => $menu->slug])
             ->with('edit_token', $menu->edit_token);
@@ -212,6 +230,8 @@ class MenuController extends Controller
             'whatsapp'                 => 'nullable|string|max:30',
             'instagram'                => 'nullable|string|max:100',
             'facebook'                 => 'nullable|string|max:100',
+            'contact_email'            => 'nullable|email|max:200',
+            'recovery_email'           => 'nullable|email|max:200',
             'primary_color'            => 'nullable|string|max:7',
             'accent_color'             => 'nullable|string|max:7',
             'sections'                 => 'required|array|min:1',
@@ -222,6 +242,7 @@ class MenuController extends Controller
             'sections.*.items.*.description' => 'nullable|string|max:400',
             'sections.*.items.*.price'       => 'nullable|numeric|min:0|max:99999',
             'sections.*.items.*.image_url'   => 'nullable|url|max:500',
+            'sections.*.items.*.image_file'  => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'sections.*.items.*.badges'      => 'nullable|array',
         ]);
 
@@ -236,12 +257,14 @@ class MenuController extends Controller
             'whatsapp'        => $data['whatsapp'] ?? null,
             'instagram'       => $data['instagram'] ?? null,
             'facebook'        => $data['facebook'] ?? null,
+            'contact_email'   => $data['contact_email'] ?? null,
+            'recovery_email'  => $data['recovery_email'] ?? null,
             'primary_color'   => $data['primary_color'] ?? '#d97706',
             'accent_color'    => $data['accent_color'] ?? '#92400e',
         ]);
 
         $menu->sections()->delete();
-        $this->saveSections($menu, $data['sections'] ?? []);
+        $this->saveSections($menu, $data['sections'] ?? [], $request);
 
         return redirect()->route('menu.show', $menu->slug)
             ->with('success', 'Menu updated successfully!');
@@ -249,7 +272,7 @@ class MenuController extends Controller
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
-    private function saveSections(Menu $menu, array $sections): void
+    private function saveSections(Menu $menu, array $sections, Request $request): void
     {
         foreach ($sections as $sectionIndex => $sectionData) {
             $section = MenuSection::create([
@@ -260,12 +283,20 @@ class MenuController extends Controller
             ]);
 
             foreach (($sectionData['items'] ?? []) as $itemIndex => $itemData) {
+                // Resolve item image: uploaded file takes priority over URL
+                $imageUrl = $itemData['image_url'] ?? null;
+                $itemFile = $request->file("sections.{$sectionIndex}.items.{$itemIndex}.image_file");
+                if ($itemFile && $itemFile->isValid()) {
+                    $path = $itemFile->store("menus/{$menu->slug}/items", 'public');
+                    $imageUrl = '/storage/' . $path;
+                }
+
                 MenuItem::create([
                     'menu_section_id' => $section->id,
                     'name'            => $itemData['name'],
                     'description'     => $itemData['description'] ?? null,
                     'price'           => isset($itemData['price']) && $itemData['price'] !== '' ? $itemData['price'] : null,
-                    'image_url'       => $itemData['image_url'] ?? null,
+                    'image_url'       => $imageUrl,
                     'is_available'    => ($itemData['is_available'] ?? '1') === '1',
                     'is_featured'     => ($itemData['is_featured'] ?? '0') === '1',
                     'badges'          => $itemData['badges'] ?? null,
@@ -273,6 +304,52 @@ class MenuController extends Controller
                 ]);
             }
         }
+    }
+
+    // ── Link Recovery ────────────────────────────────────────────────────────
+
+    public function recoverForm()
+    {
+        return view('menu.recover');
+    }
+
+    public function recoverSend(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $menus = Menu::where('recovery_email', $request->email)->get();
+
+        if ($menus->isNotEmpty()) {
+            $menuList = $menus;
+            Mail::raw(
+                $this->buildRecoveryEmailBody($menus->all()),
+                function ($msg) use ($request, $menus) {
+                    $subject = $menus->count() === 1
+                        ? 'Seu link de edição do cardápio – ' . $menus->first()->restaurant_name
+                        : 'Seus links de edição de cardápio – QRGenerate.net';
+                    $msg->to($request->email)->subject($subject);
+                }
+            );
+        }
+
+        // Always show success — don't leak whether email exists
+        return back()->with('sent', true);
+    }
+
+    private function buildRecoveryEmailBody(array $menus): string
+    {
+        $body = "Olá!\n\nRecebemos uma solicitação de recuperação do link de edição do seu cardápio no QRGenerate.net.\n\n";
+
+        foreach ($menus as $menu) {
+            $body .= "Restaurante: {$menu->restaurant_name}\n";
+            $body .= "Link de edição: {$menu->editUrl()}\n\n";
+        }
+
+        $body .= "Não compartilhe estes links publicamente – qualquer pessoa com eles pode editar seu cardápio.\n\n";
+        $body .= "Se você não solicitou este e-mail, pode ignorá-lo com segurança.\n\n";
+        $body .= "Atenciosamente,\nEquipe QRGenerate.net";
+
+        return $body;
     }
 
     private function resolveImageUrl(

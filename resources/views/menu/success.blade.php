@@ -70,7 +70,12 @@
                 <div style="font-size:20px;">⚠️</div>
                 <div>
                     <strong style="color:#92400e; font-size:13px;">Guarde este link com cuidado!</strong>
-                    <p style="color:#78350f; font-size:12px; margin:4px 0 0;">Qualquer pessoa com este link poderá editar seu cardápio. Não o compartilhe publicamente. <strong>Não temos como recuperar este link se você perdê-lo.</strong></p>
+                    <p style="color:#78350f; font-size:12px; margin:4px 0 0;">Qualquer pessoa com este link poderá editar seu cardápio. Não o compartilhe publicamente.</p>
+                    @if($menu->recovery_email)
+                    <p style="color:#78350f; font-size:12px; margin:6px 0 0;">📧 Uma cópia do link de edição foi enviada para <strong>{{ $menu->recovery_email }}</strong>. Você também pode recuperá-lo pelo <a href="{{ route('menu.recover.pt') }}" style="color:#92400e;">link de recuperação</a>.</p>
+                    @else
+                    <p style="color:#78350f; font-size:12px; margin:4px 0 0;"><strong>Não temos como recuperar este link se você perdê-lo.</strong> Considere salvar um e-mail de recuperação ao editar o cardápio.</p>
+                    @endif
                 </div>
             </div>
             <div class="url-box">
@@ -78,6 +83,20 @@
                 <button class="btn-copy" onclick="copyUrl('editUrl', this)">Copiar</button>
             </div>
         </div>
+    </div>
+    @endif
+
+    {{-- Recovery email confirmation --}}
+    @if($menu->recovery_email)
+    <div class="success-card">
+        <div class="success-card-header">📧 Link enviado por e-mail</div>
+        <div class="success-card-body">
+            <p style="color:#555; font-size:13px; margin:0;">O link de edição foi enviado para <strong>{{ $menu->recovery_email }}</strong>. Se perdê-lo no futuro, <a href="{{ route('menu.recover.pt') }}" style="color:#7b4397;">solicite novamente aqui</a>.</p>
+        </div>
+    </div>
+    @else
+    <div style="background:#faf8fc; border:1px solid #e4d9f0; border-radius:10px; padding:12px 16px; font-size:13px; color:#666; text-align:center; margin-bottom:10px;">
+        💡 Não cadastrou e-mail de recuperação? <a href="{{ route('menu.recover.pt') }}" style="color:#7b4397;">Solicite o link por e-mail</a> se o perder.
     </div>
     @endif
 

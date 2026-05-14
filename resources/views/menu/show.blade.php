@@ -305,6 +305,13 @@
         .fab-whatsapp:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37,211,102,.5); }
         .fab-whatsapp svg { width: 28px; height: 28px; fill: #fff; }
 
+        /* Search */
+        .search-wrap { max-width: 900px; margin: 0 auto; padding: 16px 16px 0; }
+        .search-input-wrap { position: relative; }
+        .search-input-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+        #menuSearch { width: 100%; padding: 10px 14px 10px 36px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-family: inherit; background: var(--white); color: var(--text); outline: none; transition: border-color .2s; }
+        #menuSearch:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
+        #menuSearch::placeholder { color: var(--muted); }
         /* Badge map labels */
         .badge-label-vegan::before { content: '🌿 '; }
         .badge-label-vegetariano::before { content: '🥗 '; }
@@ -359,6 +366,14 @@
 </div>
 @endif
 
+{{-- Search --}}
+<div class="search-wrap">
+    <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="menuSearch" placeholder="{{ $menu->sections->count() > 0 ? 'Buscar no cardápio...' : 'Search menu...' }}" autocomplete="off">
+    </div>
+</div>
+
 {{-- Menu Content --}}
 <div class="content">
 
@@ -378,7 +393,7 @@
         @if($section->items->count() > 0)
         <div class="items-grid">
             @foreach($section->items as $item)
-            <div class="item-card {{ $item->is_featured ? 'featured' : '' }} {{ !$item->is_available ? 'unavailable' : '' }}">
+            <div class="item-card {{ $item->is_featured ? 'featured' : '' }} {{ !$item->is_available ? 'unavailable' : '' }}" data-name="{{ strtolower($item->name) }}" data-desc="{{ strtolower($item->description ?? '') }}">
                 @if($item->is_featured)
                 <div class="featured-ribbon">⭐ Destaque</div>
                 @endif
@@ -457,6 +472,27 @@ function scrollToSection(id, navItem) {
     window.scrollTo({ top, behavior: 'smooth' });
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     navItem.classList.add('active');
+}
+
+// Search
+const searchInput = document.getElementById('menuSearch');
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const q = this.value.trim().toLowerCase();
+        document.querySelectorAll('.menu-section').forEach(section => {
+            let anyVisible = false;
+            section.querySelectorAll('.item-card').forEach(card => {
+                const match = !q || card.dataset.name.includes(q) || card.dataset.desc.includes(q);
+                card.style.display = match ? '' : 'none';
+                if (match) anyVisible = true;
+            });
+            section.style.display = anyVisible ? '' : 'none';
+            // sync nav link visibility
+            const sectionId = section.id;
+            const navLink = document.querySelector(`.nav-item[data-target="${sectionId}"]`);
+            if (navLink) navLink.style.display = anyVisible ? '' : 'none';
+        });
+    });
 }
 
 // Highlight nav on scroll
