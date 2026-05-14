@@ -30,9 +30,11 @@
     </p>
     <p>&copy; {{ date('Y') }} {{ config('qrgenerate.name') }}.
         @if(($locale ?? 'en') === 'pt')
-            Todos os direitos reservados.
+            Todos os direitos reservados. &middot;
+            <a href="https://github.com/jorgeedvaldo/qrgenerate.net" target="_blank" rel="noopener" style="font-size:13px;">GitHub</a>
         @else
-            All rights reserved.
+            All rights reserved. &middot;
+            <a href="https://github.com/jorgeedvaldo/qrgenerate.net" target="_blank" rel="noopener" style="font-size:13px;">GitHub</a>
         @endif
     </p>
 </footer>
