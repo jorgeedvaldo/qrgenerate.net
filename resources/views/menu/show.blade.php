@@ -11,6 +11,9 @@
     <meta property="og:image" content="{{ $menu->cover_url }}">
     @endif
     <meta name="theme-color" content="{{ $menu->primary_color }}">
+    <link rel="canonical" href="{{ $menu->publicUrl() }}">
+    <link rel="alternate" hreflang="pt" href="{{ $menu->publicUrl() }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $menu->publicUrl() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -429,7 +432,11 @@
 
 {{-- Footer --}}
 <div class="menu-footer">
-    <p>Cardápio digital criado com <a href="{{ url('/cardapio/criar') }}" target="_blank">QRGenerate.net</a> · Gratuito e sem cadastro</p>
+    <p>
+        Cardápio digital criado com <a href="{{ route('menu.landing.pt') }}" target="_blank">QRGenerate.net</a> · Gratuito e sem cadastro
+        &nbsp;·&nbsp;
+        <a href="{{ route('menu.landing.en') }}" target="_blank" style="color:#9ca3af; font-size:11px;">Digital menu for restaurants</a>
+    </p>
 </div>
 
 {{-- WhatsApp FAB --}}

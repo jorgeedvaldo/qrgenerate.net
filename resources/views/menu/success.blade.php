@@ -81,9 +81,11 @@
     </div>
     @endif
 
-    {{-- Criar novo --}}
-    <div style="text-align:center; margin-top:10px;">
-        <a href="{{ route('menu.create') }}" style="color:#7b4397; font-size:14px;">+ Criar outro cardápio</a>
+    {{-- Create another --}}
+    <div style="text-align:center; margin-top:10px; display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
+        <a href="{{ route('menu.create.pt') }}" style="color:#7b4397; font-size:14px;">🇧🇷 + Criar outro cardápio</a>
+        <span style="color:#ccc;">|</span>
+        <a href="{{ route('menu.create.en') }}" style="color:#7b4397; font-size:14px;">🇬🇧 + Create another menu</a>
     </div>
 </div>
 @endsection

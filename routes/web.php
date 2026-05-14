@@ -55,16 +55,40 @@ Route::get('/pt/artigos/{slug}', [ArticleController::class, 'show'])
     ->defaults('locale', 'pt')
     ->where('slug', '[a-z0-9\-]+');
 
-// Menu (cardápio digital) — must be before catch-all routes
-Route::get('/cardapio/criar', [MenuController::class, 'create'])->name('menu.create');
+// ─── Digital Menu / Cardápio Digital ────────────────────────────────────────
+// SEO landing pages
+Route::get('/digital-menu-generator', [MenuController::class, 'landingEn'])
+    ->name('menu.landing.en');
+Route::get('/pt/gerador-de-cardapio-digital', [MenuController::class, 'landingPt'])
+    ->name('menu.landing.pt');
+
+// Create form — bilingual URLs
+Route::get('/menu/create',    [MenuController::class, 'createEn'])->name('menu.create.en');
+Route::get('/cardapio/criar', [MenuController::class, 'createPt'])->name('menu.create.pt');
+
+// Store (single endpoint, locale-independent)
 Route::post('/menu', [MenuController::class, 'store'])->name('menu.store');
-Route::get('/menu/{slug}/sucesso', [MenuController::class, 'success'])->name('menu.success');
-Route::get('/menu/{slug}/editar', [MenuController::class, 'edit'])->name('menu.edit');
-Route::put('/menu/{slug}', [MenuController::class, 'update'])->name('menu.update');
-Route::get('/menu/{slug}', [MenuController::class, 'show'])->name('menu.show')
+
+// Success page
+Route::get('/menu/{slug}/sucesso', [MenuController::class, 'success'])->name('menu.success')
     ->where('slug', '[a-z0-9\-]+');
 
-// Portuguese QR pages
+// Edit form — bilingual URLs (must stay before {slug} catch-all)
+Route::get('/menu/{slug}/editar', [MenuController::class, 'editPt'])->name('menu.edit.pt')
+    ->where('slug', '[a-z0-9\-]+');
+Route::get('/menu/{slug}/edit', [MenuController::class, 'editEn'])->name('menu.edit.en')
+    ->where('slug', '[a-z0-9\-]+');
+
+// Update
+Route::put('/menu/{slug}', [MenuController::class, 'update'])->name('menu.update')
+    ->where('slug', '[a-z0-9\-]+');
+
+// Public menu page
+Route::get('/menu/{slug}', [MenuController::class, 'show'])->name('menu.show')
+    ->where('slug', '[a-z0-9\-]+');
+// ────────────────────────────────────────────────────────────────────────────
+
+// Portuguese QR pages (must come after explicit PT routes above)
 Route::get('/pt/{slug}', [QrPageController::class, 'showPt'])
     ->name('qr-page.pt')
     ->where('slug', '[a-z0-9\-]+');
@@ -72,4 +96,4 @@ Route::get('/pt/{slug}', [QrPageController::class, 'showPt'])
 // English QR pages (catch-all — must be LAST)
 Route::get('/{slug}', [QrPageController::class, 'show'])
     ->name('qr-page.en')
-    ->where('slug', '^(?!pt$|api|storage|sitemap|robots|articles|menu|cardapio).[a-z0-9\-]+$');
+    ->where('slug', '^(?!pt$|api|storage|sitemap|robots|articles|menu|cardapio|digital-menu-generator).[a-z0-9\-]+$');

@@ -68,6 +68,12 @@ class SitemapController extends Controller
             ];
         }
 
+        // ── Digital menu pages ──
+        $urls[] = ['loc' => "{$baseUrl}/digital-menu-generator",          'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.9'];
+        $urls[] = ['loc' => "{$baseUrl}/pt/gerador-de-cardapio-digital",  'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.9'];
+        $urls[] = ['loc' => "{$baseUrl}/menu/create",                     'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.8'];
+        $urls[] = ['loc' => "{$baseUrl}/cardapio/criar",                  'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.8'];
+
         // ── Article index pages ──
         $urls[] = ['loc' => "{$baseUrl}/articles", 'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.7'];
         $urls[] = ['loc' => "{$baseUrl}/pt/artigos", 'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.7'];
