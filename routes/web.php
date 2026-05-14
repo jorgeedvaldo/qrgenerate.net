@@ -5,6 +5,7 @@ use App\Http\Controllers\QrPageController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\MenuController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,6 +55,15 @@ Route::get('/pt/artigos/{slug}', [ArticleController::class, 'show'])
     ->defaults('locale', 'pt')
     ->where('slug', '[a-z0-9\-]+');
 
+// Menu (cardápio digital) — must be before catch-all routes
+Route::get('/cardapio/criar', [MenuController::class, 'create'])->name('menu.create');
+Route::post('/menu', [MenuController::class, 'store'])->name('menu.store');
+Route::get('/menu/{slug}/sucesso', [MenuController::class, 'success'])->name('menu.success');
+Route::get('/menu/{slug}/editar', [MenuController::class, 'edit'])->name('menu.edit');
+Route::put('/menu/{slug}', [MenuController::class, 'update'])->name('menu.update');
+Route::get('/menu/{slug}', [MenuController::class, 'show'])->name('menu.show')
+    ->where('slug', '[a-z0-9\-]+');
+
 // Portuguese QR pages
 Route::get('/pt/{slug}', [QrPageController::class, 'showPt'])
     ->name('qr-page.pt')
@@ -62,4 +72,4 @@ Route::get('/pt/{slug}', [QrPageController::class, 'showPt'])
 // English QR pages (catch-all — must be LAST)
 Route::get('/{slug}', [QrPageController::class, 'show'])
     ->name('qr-page.en')
-    ->where('slug', '^(?!pt$|api|storage|sitemap|robots|articles).[a-z0-9\-]+$');
+    ->where('slug', '^(?!pt$|api|storage|sitemap|robots|articles|menu|cardapio).[a-z0-9\-]+$');
