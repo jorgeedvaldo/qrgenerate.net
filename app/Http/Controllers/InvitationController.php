@@ -106,6 +106,7 @@ class InvitationController extends Controller
         );
 
         $this->syncEvents($invitation, $data['events'] ?? []);
+        $this->syncSchedule($invitation, $data['schedule'] ?? []);
         $this->syncGifts($invitation, $data['gifts'] ?? []);
         $this->syncPhotos($invitation, $data['photos'] ?? [], $request);
 
@@ -131,6 +132,7 @@ class InvitationController extends Controller
         $invitation->update($this->attributes($request, $data, $invitation->slug, $invitation));
 
         $this->syncEvents($invitation, $data['events'] ?? []);
+        $this->syncSchedule($invitation, $data['schedule'] ?? []);
         $this->syncGifts($invitation, $data['gifts'] ?? []);
         $this->syncPhotos($invitation, $data['photos'] ?? [], $request);
 
@@ -192,7 +194,7 @@ class InvitationController extends Controller
             $out = fopen('php://output', 'w');
             // BOM so Excel opens accented names correctly.
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['Nome', 'E-mail', 'Telefone', 'Presença', 'Acompanhantes', 'Nomes dos acompanhantes', 'Recado', 'Data']);
+            fputcsv($out, ['Nome', 'E-mail', 'Telefone', 'Presença', 'Acompanhantes', 'Nomes dos acompanhantes', 'Música para o DJ', 'Recado', 'Data']);
 
             foreach ($rsvps as $rsvp) {
                 fputcsv($out, [
@@ -202,6 +204,7 @@ class InvitationController extends Controller
                     $rsvp->attending ? 'Sim' : 'Não',
                     $rsvp->companions,
                     $rsvp->companion_names,
+                    $rsvp->song_request,
                     $rsvp->message,
                     $rsvp->created_at->format('d/m/Y H:i'),
                 ]);
@@ -226,7 +229,7 @@ class InvitationController extends Controller
             ->where('user_id', $request->user()->id);
 
         if ($withRelations) {
-            $query->with(['events', 'gifts', 'photos']);
+            $query->with(['events', 'scheduleItems', 'gifts', 'photos']);
         }
 
         return $query->firstOrFail();
@@ -260,12 +263,20 @@ class InvitationController extends Controller
             'dress_code'        => $data['dress_code'] ?? null,
             'dress_code_notes'  => $data['dress_code_notes'] ?? null,
             'hashtag'           => $data['hashtag'] ?? null,
+            'monogram'          => $data['monogram'] ?? null,
+            'envelope_enabled'  => $request->boolean('envelope_enabled'),
+            'petals_enabled'    => $request->boolean('petals_enabled'),
+            'mascot_enabled'    => $request->boolean('mascot_enabled'),
+            'guest_tips'        => $this->cleanTips($data['tips'] ?? []),
+            'ride_links'        => $this->cleanRides($data['rides'] ?? []),
             'music_url'         => $data['music_url'] ?? null,
             'gift_message'      => $data['gift_message'] ?? null,
             'pix_key'           => $data['pix_key'] ?? null,
             'pix_name'          => $data['pix_name'] ?? null,
             'bank_details'      => $data['bank_details'] ?? null,
             'rsvp_enabled'      => $request->boolean('rsvp_enabled'),
+            'rsvp_mode'         => $data['rsvp_mode'] ?? 'site',
+            'song_request_enabled' => $request->boolean('song_request_enabled'),
             'rsvp_deadline'     => $data['rsvp_deadline'] ?? null,
             'allow_companions'  => $request->boolean('allow_companions'),
             'max_companions'    => $data['max_companions'] ?? 2,
@@ -299,6 +310,53 @@ class InvitationController extends Controller
                 'sort_order' => $order++,
             ]);
         }
+    }
+
+    private function syncSchedule(Invitation $invitation, array $rows): void
+    {
+        $invitation->scheduleItems()->delete();
+
+        $order = 0;
+        foreach ($rows as $row) {
+            if (blank($row['title'] ?? null)) {
+                continue;
+            }
+
+            $invitation->scheduleItems()->create([
+                'time'        => $row['time'] ?? null,
+                'title'       => $row['title'],
+                'description' => $row['description'] ?? null,
+                'sort_order'  => $order++,
+            ]);
+        }
+    }
+
+    /** Drop blank rows so an empty repeater stores null rather than [[]]. */
+    private function cleanTips(array $tips): ?array
+    {
+        $clean = [];
+        foreach ($tips as $tip) {
+            if (filled($tip['text'] ?? null)) {
+                $clean[] = [
+                    'icon' => $tip['icon'] ?? 'sparkle',
+                    'text' => $tip['text'],
+                ];
+            }
+        }
+
+        return $clean ?: null;
+    }
+
+    private function cleanRides(array $rides): ?array
+    {
+        $clean = [];
+        foreach ($rides as $ride) {
+            if (filled($ride['label'] ?? null) && filled($ride['url'] ?? null)) {
+                $clean[] = ['label' => $ride['label'], 'url' => $ride['url']];
+            }
+        }
+
+        return $clean ?: null;
     }
 
     private function syncGifts(Invitation $invitation, array $gifts): void

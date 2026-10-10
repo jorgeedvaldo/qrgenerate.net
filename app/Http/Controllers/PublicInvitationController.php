@@ -56,6 +56,7 @@ class PublicInvitationController extends Controller
             'companions'      => ['nullable', 'integer', 'min:0', "max:{$maxCompanions}"],
             'companion_names' => ['nullable', 'string', 'max:500'],
             'message'         => ['nullable', 'string', 'max:800'],
+            'song_request'    => ['nullable', 'string', 'max:160'],
             'guest_code'      => ['nullable', 'string', 'max:32'],
             'guest_name'      => ['nullable', 'string', 'max:120'],
         ]);
@@ -73,6 +74,7 @@ class PublicInvitationController extends Controller
             'companions'          => $attending ? (int) ($data['companions'] ?? 0) : 0,
             'companion_names'     => $attending ? ($data['companion_names'] ?? null) : null,
             'message'             => $data['message'] ?? null,
+            'song_request'        => $data['song_request'] ?? null,
             'ip_hash'             => $this->ipHash($request),
         ]);
 

@@ -60,12 +60,19 @@ QRGenerate.net is an open-source web application that lets anyone create QR code
 ### Wedding & Engagement Invitations
 - 💍 Online invitation page for a wedding or an engagement
 - 👤 Free account with **Google sign-in** or just an email and password
+- ✉️ **Envelope intro** — the guest taps a wax seal with your monogram to open the invitation
 - 💌 Personalised guest links — `?c=Name` greets the guest by name, or register a guest list and get one link each
-- 📝 Online RSVP with companions, a note to the couple, and CSV export
+- 📝 Online RSVP with companions, a song request for the DJ, a note to the couple, and CSV export
+- 💬 RSVP by **WhatsApp** instead of (or alongside) the site form, with the reply pre-formatted
 - ⏳ Live countdown to the celebration
-- 📍 Ceremony, reception and party, each with address, Google Maps button and an "add to calendar" button
+- 📍 Ceremony, reception and party, each with address, Google Maps and Apple Maps buttons, a copy-address button and an "add to calendar" button
+- 🚗 Ride-hailing buttons (Yango, Heetch, Uber…) that send the guest straight to the venue
+- 🕐 **Programme of the evening** — a timeline of welcome, toast, dinner and dancing
+- 📖 **Guest handbook** — short illustrated notes on punctuality, dress code, photos and more
 - 🎁 Gift list with reservations (so nothing is brought twice), plus Pix key and bank details
 - 📷 Photo gallery with a lightbox, and a guestbook for the guests' wishes
+- 🖨️ **Printable keepsake card** naming the guest of honour, laid out for A5
+- ✨ Falling petals, a couple illustration, parallax detail, gold-foil lettering and confetti on a confirmed reply
 - 👗 Dress code, hashtag and optional background music
 - 🎨 Four templates (classic, botanical, modern, romantic), four typefaces and custom colours
 - 📱 Shareable link and a print-ready QR code
@@ -220,6 +227,7 @@ app/
     User.php                       # Account (nullable password for Google-only sign-in)
     Invitation.php                 # The invitation itself (couple, date, theme, settings)
     InvitationEvent.php            # Ceremony / reception / party, with map link
+    InvitationScheduleItem.php     # One moment in the programme of the evening
     InvitationGuest.php            # Named guest + their ?c= code
     InvitationRsvp.php             # A reply, with companions
     InvitationGift.php             # Gift list entry and its reservation
@@ -247,12 +255,13 @@ resources/views/
     index.blade.php         # Owner dashboard listing their invitations
     create.blade.php        # New invitation
     edit.blade.php          # Edit an existing invitation
-    _form.blade.php         # The 8-step builder, shared by create and edit
+    _form.blade.php         # The 9-step builder, shared by create and edit
+    _tip-icon.blade.php     # Inline icon for one guest-handbook note
     _dash.blade.php         # Shared dashboard styling
     share.blade.php         # Public link + QR code + next steps
     guests.blade.php        # Guest list with one personalised link each
     rsvps.blade.php         # Replies, totals and CSV export
-    show.blade.php          # The public invitation page (self-contained, themed)
+    show.blade.php          # The public invitation page (envelope, petals, timeline, keepsake)
   auth/
     login.blade.php
     register.blade.php
@@ -330,12 +339,19 @@ QRGenerate.net é uma aplicação web open-source que permite criar QR Codes e c
 ### Convite de Casamento e Noivado
 - 💍 Página de convite online para casamento ou noivado
 - 👤 Conta grátis com **login pelo Google** ou apenas e-mail e senha
+- ✉️ **Abertura com envelope** — o convidado toca num selo com o seu monograma para abrir o convite
 - 💌 Link personalizado por convidado — `?c=Nome` saúda o convidado pelo nome, ou cadastre a lista e receba um link para cada um
-- 📝 Confirmação de presença (RSVP) com acompanhantes, recado para o casal e exportação em CSV
+- 📝 Confirmação de presença (RSVP) com acompanhantes, pedido de música para o DJ, recado para o casal e exportação em CSV
+- 💬 RSVP por **WhatsApp** em vez do (ou além do) formulário, com a mensagem já formatada
 - ⏳ Contagem regressiva em tempo real
-- 📍 Cerimónia, recepção e festa, cada uma com endereço, botão do Google Maps e botão para adicionar à agenda
+- 📍 Cerimónia, recepção e festa, cada uma com endereço, botões do Google Maps e Apple Maps, botão para copiar o endereço e para adicionar à agenda
+- 🚗 Botões de táxi e apps de transporte (Yango, Heetch, Uber…) que levam o convidado direto ao local
+- 🕐 **Programa da noite** — a sequência de receção, brinde, jantar e festa
+- 📖 **Manual do bom convidado** — avisos ilustrados sobre pontualidade, traje, fotos e mais
 - 🎁 Lista de presentes com reserva (para ninguém repetir presente), além de chave Pix e dados bancários
 - 📷 Galeria de fotos com visualização ampliada e mural de recados dos convidados
+- 🖨️ **Convite para imprimir** com o nome do convidado de honra, no formato A5
+- ✨ Pétalas a cair, ilustração do casal, efeito parallax, letras douradas e confetes ao confirmar presença
 - 👗 Traje, hashtag e música de fundo opcional
 - 🎨 Quatro estilos (clássico, botânico, moderno, romântico), quatro tipos de letra e cores personalizadas
 - 📱 Link para partilhar e QR Code pronto a imprimir

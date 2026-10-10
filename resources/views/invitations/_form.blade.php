@@ -41,6 +41,25 @@
         ])->all()
         : [['kind' => 'ceremony', 'title' => $isPt ? 'Cerimónia' : 'Ceremony']]);
 
+    $schedule = old('schedule') ?? ($inv
+        ? $inv->scheduleItems->map(fn ($r) => [
+            'time' => $r->time ? substr($r->time, 0, 5) : '',
+            'title' => $r->title, 'description' => $r->description,
+        ])->all()
+        : [
+            ['time' => '18:00', 'title' => $isPt ? 'Receção dos convidados' : 'Welcoming the guests'],
+            ['time' => '20:00', 'title' => $isPt ? 'Jantar' : 'Dinner'],
+        ]);
+
+    $tips = old('tips') ?? ($inv ? ($inv->guest_tips ?: []) : [
+        ['icon' => 'users', 'text' => $isPt ? 'A vossa presença é essencial' : 'Your presence means everything'],
+        ['icon' => 'clock', 'text' => $isPt ? 'Por favor, sejam pontuais' : 'Please be on time'],
+        ['icon' => 'dress', 'text' => $isPt ? 'Traje elegante' : 'Smart dress'],
+        ['icon' => 'camera', 'text' => $isPt ? 'Registem o nosso dia' : 'Capture our day'],
+    ]);
+
+    $rides = old('rides') ?? ($inv ? ($inv->ride_links ?: []) : []);
+
     $gifts = old('gifts') ?? ($inv
         ? $inv->gifts->map(fn ($g) => [
             'name' => $g->name, 'description' => $g->description, 'price' => $g->price,
@@ -118,6 +137,13 @@
     </div>
 
     <div class="form-group">
+        <label>{{ $t['monogram'] }}</label>
+        <input type="text" name="monogram" class="form-control" maxlength="12"
+               placeholder="{{ $t['monogram_ph'] }}" value="{{ $val('monogram') }}">
+        <span class="help-small">{{ $t['monogram_hint'] }}</span>
+    </div>
+
+    <div class="form-group">
         <label>{{ $t['display_title'] }}</label>
         <input type="text" name="display_title" class="form-control" maxlength="120"
                placeholder="{{ $t['display_title_ph'] }}" value="{{ $val('display_title') }}">
@@ -179,6 +205,30 @@
             <input type="url" name="couple_photo_url" class="form-control" style="margin-top:8px;" maxlength="500"
                    placeholder="{{ $t['or_url'] }}" value="{{ $val('couple_photo_url') }}">
             <span class="help-small">{{ $t['photo_hint'] }}</span>
+        </div>
+    </div>
+
+    <div style="margin-top:6px;">
+        <div class="switch-row">
+            <span class="switch-label">{{ $t['envelope_on'] }}<span class="switch-hint">{{ $t['envelope_on_hint'] }}</span></span>
+            <label class="toggle">
+                <input type="checkbox" name="envelope_enabled" value="1" @checked($bool('envelope_enabled', true))>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="switch-row">
+            <span class="switch-label">{{ $t['petals_on'] }}<span class="switch-hint">{{ $t['petals_on_hint'] }}</span></span>
+            <label class="toggle">
+                <input type="checkbox" name="petals_enabled" value="1" @checked($bool('petals_enabled', true))>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="switch-row">
+            <span class="switch-label">{{ $t['mascot_on'] }}<span class="switch-hint">{{ $t['mascot_on_hint'] }}</span></span>
+            <label class="toggle">
+                <input type="checkbox" name="mascot_enabled" value="1" @checked($bool('mascot_enabled', true))>
+                <span class="toggle-slider"></span>
+            </label>
         </div>
     </div>
 </div>
@@ -267,9 +317,41 @@
     <button type="button" class="btn-add" onclick="addEvent()">+ {{ $t['add_event'] }}</button>
 </div>
 
-{{-- ── 5. Dress code, hashtag, music ───────────────────────────────── --}}
+{{-- ── Programme of the evening ────────────────────────────────────── --}}
 <div class="panel-box">
     <span class="step-badge">{{ $t['step'] }} 5</span>
+    <h2>{{ $t['s4b'] }}</h2>
+    <p class="panel-hint">{{ $t['s4b_hint'] }}</p>
+
+    <div id="scheduleList">
+        @foreach($schedule as $i => $row)
+            <div class="repeater-item" data-repeater="schedule">
+                <button type="button" class="remove-btn" onclick="removeItem(this)">{{ $t['remove'] }}</button>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>{{ $t['sched_time'] }}</label>
+                        <input type="time" name="schedule[{{ $i }}][time]" class="form-control" value="{{ $row['time'] ?? '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ $t['sched_title'] }}</label>
+                        <input type="text" name="schedule[{{ $i }}][title]" class="form-control" maxlength="120"
+                               placeholder="{{ $t['sched_title_ph'] }}" value="{{ $row['title'] ?? '' }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>{{ $t['sched_desc'] }}</label>
+                    <input type="text" name="schedule[{{ $i }}][description]" class="form-control" maxlength="250"
+                           placeholder="{{ $t['sched_desc_ph'] }}" value="{{ $row['description'] ?? '' }}">
+                </div>
+            </div>
+        @endforeach
+    </div>
+    <button type="button" class="btn-add" onclick="addSchedule()">+ {{ $t['add_sched'] }}</button>
+</div>
+
+{{-- ── 5. Dress code, hashtag, music ───────────────────────────────── --}}
+<div class="panel-box">
+    <span class="step-badge">{{ $t['step'] }} 6</span>
     <h2>{{ $t['s5'] }}</h2>
     <p class="panel-hint">{{ $t['s5_hint'] }}</p>
 
@@ -296,11 +378,60 @@
                placeholder="https://.../musica.mp3" value="{{ $val('music_url') }}">
         <span class="help-small">{{ $t['music_hint'] }}</span>
     </div>
+
+    <h2 style="margin-top:22px;">{{ $t['tips'] }}</h2>
+    <p class="panel-hint">{{ $t['tips_hint'] }}</p>
+    <div id="tipsList">
+        @foreach($tips as $i => $tip)
+            <div class="repeater-item" data-repeater="tips">
+                <button type="button" class="remove-btn" onclick="removeItem(this)">{{ $t['remove'] }}</button>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>{{ $t['tip_icon'] }}</label>
+                        <select name="tips[{{ $i }}][icon]" class="form-control">
+                            @foreach($t['tip_icons'] as $key => $label)
+                                <option value="{{ $key }}" @selected(($tip['icon'] ?? 'sparkle') === $key)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>{{ $t['tip_text'] }}</label>
+                        <input type="text" name="tips[{{ $i }}][text]" class="form-control" maxlength="120"
+                               placeholder="{{ $t['tip_text_ph'] }}" value="{{ $tip['text'] ?? '' }}">
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+    <button type="button" class="btn-add" onclick="addTip()">+ {{ $t['add_tip'] }}</button>
+
+    <h2 style="margin-top:22px;">{{ $t['rides'] }}</h2>
+    <p class="panel-hint">{{ $t['rides_hint'] }}</p>
+    <div id="ridesList">
+        @foreach($rides as $i => $ride)
+            <div class="repeater-item" data-repeater="rides">
+                <button type="button" class="remove-btn" onclick="removeItem(this)">{{ $t['remove'] }}</button>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>{{ $t['ride_label'] }}</label>
+                        <input type="text" name="rides[{{ $i }}][label]" class="form-control" maxlength="40"
+                               placeholder="{{ $t['ride_label_ph'] }}" value="{{ $ride['label'] ?? '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ $t['ride_url'] }}</label>
+                        <input type="url" name="rides[{{ $i }}][url]" class="form-control" maxlength="500"
+                               placeholder="https://..." value="{{ $ride['url'] ?? '' }}">
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+    <button type="button" class="btn-add" onclick="addRide()">+ {{ $t['add_ride'] }}</button>
 </div>
 
 {{-- ── 6. Gallery ──────────────────────────────────────────────────── --}}
 <div class="panel-box">
-    <span class="step-badge">{{ $t['step'] }} 6</span>
+    <span class="step-badge">{{ $t['step'] }} 7</span>
     <h2>{{ $t['s6'] }}</h2>
     <p class="panel-hint">{{ $t['s6_hint'] }}</p>
 
@@ -327,7 +458,7 @@
 
 {{-- ── 7. Gifts ────────────────────────────────────────────────────── --}}
 <div class="panel-box">
-    <span class="step-badge">{{ $t['step'] }} 7</span>
+    <span class="step-badge">{{ $t['step'] }} 8</span>
     <h2>{{ $t['s7'] }}</h2>
     <p class="panel-hint">{{ $t['s7_hint'] }}</p>
 
@@ -396,7 +527,7 @@
 
 {{-- ── 8. RSVP and contact ─────────────────────────────────────────── --}}
 <div class="panel-box">
-    <span class="step-badge">{{ $t['step'] }} 8</span>
+    <span class="step-badge">{{ $t['step'] }} 9</span>
     <h2>{{ $t['s8'] }}</h2>
     <p class="panel-hint">{{ $t['s8_hint'] }}</p>
 
@@ -404,6 +535,23 @@
         <span class="switch-label">{{ $t['rsvp_on'] }}<span class="switch-hint">{{ $t['rsvp_on_hint'] }}</span></span>
         <label class="toggle">
             <input type="checkbox" name="rsvp_enabled" value="1" @checked($bool('rsvp_enabled', true))>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;">
+        <label>{{ $t['rsvp_mode'] }}</label>
+        <select name="rsvp_mode" class="form-control">
+            @foreach($t['rsvp_modes'] as $key => $label)
+                <option value="{{ $key }}" @selected($val('rsvp_mode', 'site') === $key)>{{ $label }}</option>
+            @endforeach
+        </select>
+        <span class="help-small">{{ $t['rsvp_mode_hint'] }}</span>
+    </div>
+
+    <div class="switch-row">
+        <span class="switch-label">{{ $t['song_on'] }}<span class="switch-hint">{{ $t['song_on_hint'] }}</span></span>
+        <label class="toggle">
+            <input type="checkbox" name="song_request_enabled" value="1" @checked($bool('song_request_enabled', true))>
             <span class="toggle-slider"></span>
         </label>
     </div>
@@ -550,13 +698,72 @@
     </div>
 </template>
 
+<template id="tpl-schedule">
+    <div class="repeater-item" data-repeater="schedule">
+        <button type="button" class="remove-btn" onclick="removeItem(this)">{{ $t['remove'] }}</button>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>{{ $t['sched_time'] }}</label>
+                <input type="time" name="schedule[__I__][time]" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>{{ $t['sched_title'] }}</label>
+                <input type="text" name="schedule[__I__][title]" class="form-control" maxlength="120" placeholder="{{ $t['sched_title_ph'] }}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>{{ $t['sched_desc'] }}</label>
+            <input type="text" name="schedule[__I__][description]" class="form-control" maxlength="250" placeholder="{{ $t['sched_desc_ph'] }}">
+        </div>
+    </div>
+</template>
+
+<template id="tpl-tips">
+    <div class="repeater-item" data-repeater="tips">
+        <button type="button" class="remove-btn" onclick="removeItem(this)">{{ $t['remove'] }}</button>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>{{ $t['tip_icon'] }}</label>
+                <select name="tips[__I__][icon]" class="form-control">
+                    @foreach($t['tip_icons'] as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label>{{ $t['tip_text'] }}</label>
+                <input type="text" name="tips[__I__][text]" class="form-control" maxlength="120" placeholder="{{ $t['tip_text_ph'] }}">
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="tpl-rides">
+    <div class="repeater-item" data-repeater="rides">
+        <button type="button" class="remove-btn" onclick="removeItem(this)">{{ $t['remove'] }}</button>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>{{ $t['ride_label'] }}</label>
+                <input type="text" name="rides[__I__][label]" class="form-control" maxlength="40" placeholder="{{ $t['ride_label_ph'] }}">
+            </div>
+            <div class="form-group">
+                <label>{{ $t['ride_url'] }}</label>
+                <input type="url" name="rides[__I__][url]" class="form-control" maxlength="500" placeholder="https://...">
+            </div>
+        </div>
+    </div>
+</template>
+
 {{-- Repeater + theme preview behaviour --}}
 @push('scripts')
 <script>
 var counters = {
-    events: {{ count($events ?? []) }},
-    gifts:  {{ count($gifts ?? []) }},
-    photos: {{ count($photos ?? []) }}
+    events:   {{ count($events ?? []) }},
+    schedule: {{ count($schedule ?? []) }},
+    tips:     {{ count($tips ?? []) }},
+    rides:    {{ count($rides ?? []) }},
+    gifts:    {{ count($gifts ?? []) }},
+    photos:   {{ count($photos ?? []) }}
 };
 
 function addFrom(name, listId) {
@@ -568,7 +775,10 @@ function addFrom(name, listId) {
     counters[name]++;
 }
 
-function addEvent() { addFrom('events', 'eventsList'); }
+function addEvent()    { addFrom('events', 'eventsList'); }
+function addSchedule() { addFrom('schedule', 'scheduleList'); }
+function addTip()      { addFrom('tips', 'tipsList'); }
+function addRide()     { addFrom('rides', 'ridesList'); }
 function addGift()  { addFrom('gifts', 'giftsList'); }
 function addPhoto() { addFrom('photos', 'photosList'); }
 

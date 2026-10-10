@@ -9,7 +9,7 @@ class InvitationRsvp extends Model
 {
     protected $fillable = [
         'invitation_id', 'invitation_guest_id', 'name', 'email', 'phone',
-        'attending', 'companions', 'companion_names', 'message', 'ip_hash',
+        'attending', 'companions', 'companion_names', 'message', 'song_request', 'ip_hash',
     ];
 
     protected $casts = [

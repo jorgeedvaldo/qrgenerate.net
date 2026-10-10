@@ -64,6 +64,20 @@ class InvitationManagementTest extends TestCase
 
         $this->assertCount(1, $invitation->photos);
         $this->assertSame('Noivado', $invitation->photos->first()->caption);
+
+        $this->assertSame('A & Q', $invitation->monogram);
+        $this->assertSame('both', $invitation->rsvp_mode);
+        $this->assertTrue($invitation->envelope_enabled);
+        $this->assertFalse($invitation->petals_enabled, 'An unchecked switch must store false.');
+
+        $this->assertCount(2, $invitation->scheduleItems);
+        $this->assertSame('Receção dos convidados', $invitation->scheduleItems->first()->title);
+        $this->assertSame('18:00:00', $invitation->scheduleItems->first()->time);
+
+        $this->assertCount(2, $invitation->guest_tips);
+        $this->assertSame('clock', $invitation->guest_tips[0]['icon']);
+        $this->assertCount(1, $invitation->ride_links);
+        $this->assertSame('Pedir no Yango', $invitation->ride_links[0]['label']);
     }
 
     public function test_blank_repeater_rows_are_skipped(): void
@@ -74,6 +88,9 @@ class InvitationManagementTest extends TestCase
         $payload['events'][] = ['kind' => 'party', 'title' => ''];
         $payload['gifts'][] = ['name' => '', 'price' => '12'];
         $payload['photos'][] = ['image_url' => '', 'caption' => 'no image'];
+        $payload['schedule'][] = ['time' => '22:00', 'title' => ''];
+        $payload['tips'][] = ['icon' => 'heart', 'text' => ''];
+        $payload['rides'][] = ['label' => 'Sem link', 'url' => ''];
 
         $this->actingAs($user)->post(route('invitations.store'), $payload);
 
@@ -81,6 +98,9 @@ class InvitationManagementTest extends TestCase
         $this->assertCount(2, $invitation->events);
         $this->assertCount(1, $invitation->gifts);
         $this->assertCount(1, $invitation->photos);
+        $this->assertCount(2, $invitation->scheduleItems);
+        $this->assertCount(2, $invitation->guest_tips);
+        $this->assertCount(1, $invitation->ride_links);
     }
 
     public function test_creating_an_invitation_requires_a_name_and_a_date(): void
@@ -171,6 +191,7 @@ class InvitationManagementTest extends TestCase
         $user = User::factory()->create();
         $invitation = Invitation::factory()->for($user)->create();
         $invitation->events()->create(['kind' => 'ceremony', 'title' => 'Cerimónia']);
+        $invitation->scheduleItems()->create(['time' => '18:00', 'title' => 'Receção']);
         $invitation->rsvps()->create(['name' => 'Tia Maria', 'attending' => true]);
         $invitation->messages()->create(['name' => 'Tia Maria', 'message' => 'Parabéns!']);
 
@@ -180,6 +201,7 @@ class InvitationManagementTest extends TestCase
 
         $this->assertDatabaseMissing('invitations', ['id' => $invitation->id]);
         $this->assertDatabaseMissing('invitation_events', ['invitation_id' => $invitation->id]);
+        $this->assertDatabaseMissing('invitation_schedule_items', ['invitation_id' => $invitation->id]);
         $this->assertDatabaseMissing('invitation_rsvps', ['invitation_id' => $invitation->id]);
         $this->assertDatabaseMissing('invitation_messages', ['invitation_id' => $invitation->id]);
     }
@@ -246,6 +268,21 @@ class InvitationManagementTest extends TestCase
                  'address' => 'Rua Amílcar Cabral, Luanda', 'event_time' => '15:30'],
                 ['kind' => 'reception', 'title' => 'Recepção', 'venue_name' => 'Salão Talatona', 'event_time' => '18:00'],
             ],
+            'monogram'          => 'A & Q',
+            'envelope_enabled'  => '1',
+            'mascot_enabled'    => '1',
+            'rsvp_mode'         => 'both',
+            'song_request_enabled' => '1',
+            'contact_whatsapp'  => '244943184239',
+            'schedule' => [
+                ['time' => '18:00', 'title' => 'Receção dos convidados', 'description' => 'Boas-vindas e fotos.'],
+                ['time' => '20:00', 'title' => 'Jantar'],
+            ],
+            'tips' => [
+                ['icon' => 'clock', 'text' => 'Por favor, sejam pontuais'],
+                ['icon' => 'dress', 'text' => 'Traje elegante'],
+            ],
+            'rides' => [['label' => 'Pedir no Yango', 'url' => 'https://yango.com/r/luanda']],
             'gifts'  => [['name' => 'Jogo de panelas', 'price' => '45000']],
             'photos' => [['image_url' => 'https://images.example.test/noivado.jpg', 'caption' => 'Noivado']],
         ];

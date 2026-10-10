@@ -20,6 +20,14 @@ class Invitation extends Model
 
     public const FONTS = ['cormorant', 'playfair', 'lora', 'montserrat'];
 
+    public const RSVP_MODES = ['site', 'whatsapp', 'both'];
+
+    /** Icons offered for the guest tips, drawn inline on the public page. */
+    public const TIP_ICONS = [
+        'users', 'clock', 'mail', 'sparkle', 'dress',
+        'camera', 'music', 'heart', 'gift', 'no-kids',
+    ];
+
     protected $fillable = [
         'user_id', 'slug', 'type', 'template',
         'partner_one_name', 'partner_two_name', 'display_title', 'tagline',
@@ -27,9 +35,12 @@ class Invitation extends Model
         'event_date', 'event_time',
         'cover_url', 'couple_photo_url',
         'primary_color', 'accent_color', 'font',
-        'dress_code', 'dress_code_notes', 'hashtag', 'music_url',
+        'dress_code', 'dress_code_notes', 'guest_tips', 'ride_links',
+        'hashtag', 'monogram', 'music_url',
+        'envelope_enabled', 'petals_enabled', 'mascot_enabled',
         'gift_message', 'pix_key', 'pix_name', 'bank_details',
-        'rsvp_enabled', 'rsvp_deadline', 'allow_companions', 'max_companions',
+        'rsvp_enabled', 'rsvp_mode', 'song_request_enabled',
+        'rsvp_deadline', 'allow_companions', 'max_companions',
         'guestbook_enabled', 'countdown_enabled',
         'contact_phone', 'contact_whatsapp', 'contact_email',
         'is_active',
@@ -38,7 +49,13 @@ class Invitation extends Model
     protected $casts = [
         'event_date'        => 'date',
         'rsvp_deadline'     => 'date',
+        'guest_tips'        => 'array',
+        'ride_links'        => 'array',
+        'envelope_enabled'  => 'boolean',
+        'petals_enabled'    => 'boolean',
+        'mascot_enabled'    => 'boolean',
         'rsvp_enabled'      => 'boolean',
+        'song_request_enabled' => 'boolean',
         'allow_companions'  => 'boolean',
         'guestbook_enabled' => 'boolean',
         'countdown_enabled' => 'boolean',
@@ -64,6 +81,11 @@ class Invitation extends Model
     public function events(): HasMany
     {
         return $this->hasMany(InvitationEvent::class)->orderBy('sort_order');
+    }
+
+    public function scheduleItems(): HasMany
+    {
+        return $this->hasMany(InvitationScheduleItem::class)->orderBy('sort_order');
     }
 
     public function guests(): HasMany
@@ -155,6 +177,39 @@ class Invitation extends Model
         }
 
         return ! $this->startsAt()->endOfDay()->isPast();
+    }
+
+    /** Initials for the envelope seal, e.g. "A & Q". */
+    public function monogramText(): string
+    {
+        if ($this->monogram) {
+            return $this->monogram;
+        }
+
+        $one = mb_strtoupper(mb_substr(trim($this->partner_one_name), 0, 1));
+        $two = $this->partner_two_name
+            ? mb_strtoupper(mb_substr(trim($this->partner_two_name), 0, 1))
+            : '';
+
+        return $two ? "{$one} & {$two}" : $one;
+    }
+
+    public function rsvpOnSite(): bool
+    {
+        return $this->rsvp_enabled && in_array($this->rsvp_mode, ['site', 'both'], true);
+    }
+
+    public function rsvpOnWhatsapp(): bool
+    {
+        return $this->rsvp_enabled
+            && in_array($this->rsvp_mode, ['whatsapp', 'both'], true)
+            && filled($this->contact_whatsapp);
+    }
+
+    /** Digits only, as wa.me expects. */
+    public function whatsappNumber(): string
+    {
+        return preg_replace('/\D/', '', (string) $this->contact_whatsapp);
     }
 
     // ── URLs ────────────────────────────────────────────────────────────────

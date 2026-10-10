@@ -37,6 +37,10 @@ class InvitationRequest extends FormRequest
             'dress_code'        => ['nullable', 'string', 'max:120'],
             'dress_code_notes'  => ['nullable', 'string', 'max:600'],
             'hashtag'           => ['nullable', 'string', 'max:80'],
+            'monogram'          => ['nullable', 'string', 'max:12'],
+            'envelope_enabled'  => ['nullable', 'boolean'],
+            'petals_enabled'    => ['nullable', 'boolean'],
+            'mascot_enabled'    => ['nullable', 'boolean'],
             'music_url'         => ['nullable', 'url', 'max:500'],
 
             'gift_message'      => ['nullable', 'string', 'max:1000'],
@@ -45,6 +49,8 @@ class InvitationRequest extends FormRequest
             'bank_details'      => ['nullable', 'string', 'max:600'],
 
             'rsvp_enabled'      => ['nullable', 'boolean'],
+            'rsvp_mode'         => ['nullable', Rule::in(Invitation::RSVP_MODES)],
+            'song_request_enabled' => ['nullable', 'boolean'],
             'rsvp_deadline'     => ['nullable', 'date'],
             'allow_companions'  => ['nullable', 'boolean'],
             'max_companions'    => ['nullable', 'integer', 'min:0', 'max:20'],
@@ -54,6 +60,22 @@ class InvitationRequest extends FormRequest
             'contact_phone'     => ['nullable', 'string', 'max:30'],
             'contact_whatsapp'  => ['nullable', 'string', 'max:30'],
             'contact_email'     => ['nullable', 'email', 'max:200'],
+
+            // "Manual do bom convidado" tips
+            'tips'              => ['nullable', 'array', 'max:12'],
+            'tips.*.icon'       => ['nullable', Rule::in(Invitation::TIP_ICONS)],
+            'tips.*.text'       => ['nullable', 'string', 'max:120'],
+
+            // Ride-hailing deep links
+            'rides'             => ['nullable', 'array', 'max:6'],
+            'rides.*.label'     => ['nullable', 'string', 'max:40'],
+            'rides.*.url'       => ['nullable', 'url', 'max:500'],
+
+            // Programme timeline
+            'schedule'              => ['nullable', 'array', 'max:20'],
+            'schedule.*.time'       => ['nullable', 'date_format:H:i'],
+            'schedule.*.title'      => ['nullable', 'string', 'max:120'],
+            'schedule.*.description' => ['nullable', 'string', 'max:250'],
 
             // Ceremony / reception blocks
             'events'                 => ['nullable', 'array', 'max:6'],
@@ -90,6 +112,16 @@ class InvitationRequest extends FormRequest
             if ($this->input($key) === '') {
                 $blanks[$key] = null;
             }
+        }
+
+        $schedule = $this->input('schedule');
+        if (is_array($schedule)) {
+            foreach ($schedule as $i => $row) {
+                if (($row['time'] ?? null) === '') {
+                    $schedule[$i]['time'] = null;
+                }
+            }
+            $blanks['schedule'] = $schedule;
         }
 
         $events = $this->input('events');

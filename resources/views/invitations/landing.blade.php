@@ -20,6 +20,10 @@ $faqs = $isPt ? [
      'a' => 'Sim. Adicione quantos momentos quiser — cerimónia, recepção, festa — cada um com o seu horário, local e observações.'],
     ['q' => 'Como funciona a lista de presentes?',
      'a' => 'Você adiciona os presentes e, se quiser, a chave Pix ou os dados bancários. O convidado pode reservar um presente com o seu nome, para que duas pessoas não levem a mesma coisa.'],
+    ['q' => 'O que é a abertura com envelope?',
+     'a' => 'Ao abrir o link, o convidado vê um envelope fechado com um selo e as suas iniciais. Basta tocar no selo para o envelope abrir e o convite aparecer — e a música de fundo começa nesse momento. Pode desligar esta abertura nas opções do convite.'],
+    ['q' => 'Os convidados podem guardar ou imprimir o convite?',
+     'a' => 'Sim. No fim do convite há um cartão com o nome do convidado de honra e o botão "Baixar / imprimir convite", que abre a impressão já no formato A5 — dá para guardar em PDF ou imprimir em papel.'],
     ['q' => 'Posso entrar com a minha conta Google?',
      'a' => 'Sim. Pode criar a conta com o Google num clique ou usar apenas o e-mail e uma senha.'],
 ] : [
@@ -37,6 +41,10 @@ $faqs = $isPt ? [
      'a' => 'Yes. Add as many moments as you like — ceremony, reception, party — each with its own time, venue and notes.'],
     ['q' => 'How does the gift list work?',
      'a' => 'You add the gifts and, if you want, your transfer details. A guest can reserve a gift under their name so two people do not bring the same thing.'],
+    ['q' => 'What is the envelope intro?',
+     'a' => 'When the link opens, the guest sees a sealed envelope carrying your initials. One tap on the seal opens it and reveals the invitation — and the background music starts right then. You can switch the intro off in the invitation settings.'],
+    ['q' => 'Can guests save or print the invitation?',
+     'a' => 'Yes. At the end of the invitation there is a card naming the guest of honour and a "Download / print invitation" button that opens the print dialog already set to A5 — save it as a PDF or print it on paper.'],
     ['q' => 'Can I sign in with Google?',
      'a' => 'Yes. Create your account with Google in one click, or use just an email and a password.'],
 ];
@@ -258,6 +266,11 @@ $faqs = $isPt ? [
             ['🎁', 'Lista de presentes', 'Presentes com foto e valor, chave Pix ou IBAN e reserva para não repetir presentes.'],
             ['📷', 'Galeria de fotos', 'Mostre as suas fotos preferidas numa galeria com visualização ampliada.'],
             ['💬', 'Mural de recados', 'Os convidados deixam mensagens de carinho directamente no convite.'],
+            ['✉️', 'Abertura com envelope', 'O convidado toca num selo com o seu monograma para abrir o convite.'],
+            ['🕐', 'Programa da noite', 'Receção, brinde, jantar e festa numa linha de tempo bonita.'],
+            ['📖', 'Manual do bom convidado', 'Avisos sobre pontualidade, traje e fotos, com ícones.'],
+            ['🚗', 'Táxi e apps de transporte', 'Botões que levam o convidado a pedir viagem já com o destino.'],
+            ['🖨️', 'Convite para imprimir', 'Cartão em A5 com o nome do convidado de honra.'],
             ['📱', 'QR Code e partilha', 'QR Code pronto a imprimir e botões de partilha para WhatsApp e Facebook.'],
         ] : [
             ['💌', 'Personalised link', 'Every guest sees their own name on the invitation — use ?c=Name or your guest list.'],
@@ -267,6 +280,11 @@ $faqs = $isPt ? [
             ['🎁', 'Gift list', 'Gifts with photo and price, transfer details, and reservations so nothing is duplicated.'],
             ['📷', 'Photo gallery', 'Show your favourite photos in a gallery with full-size viewing.'],
             ['💬', 'Guestbook', 'Guests leave their wishes right on the invitation.'],
+            ['✉️', 'Envelope intro', 'The guest taps a wax seal with your monogram to open the invitation.'],
+            ['🕐', 'Programme of the evening', 'Welcome, toast, dinner and dancing on a neat timeline.'],
+            ['📖', 'Guest handbook', 'Illustrated notes on punctuality, dress code and photos.'],
+            ['🚗', 'Ride-hailing buttons', 'Let guests order a ride straight to the venue.'],
+            ['🖨️', 'Printable keepsake', 'An A5 card naming the guest of honour.'],
             ['📱', 'QR code and sharing', 'A print-ready QR code plus WhatsApp and Facebook share buttons.'],
         ];
         @endphp
