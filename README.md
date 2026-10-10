@@ -57,10 +57,24 @@ QRGenerate.net is an open-source web application that lets anyone create QR code
 - 🎨 Customisable primary and accent colours per menu
 - 📱 Fully responsive — looks great on any device
 
+### Wedding & Engagement Invitations
+- 💍 Online invitation page for a wedding or an engagement
+- 👤 Free account with **Google sign-in** or just an email and password
+- 💌 Personalised guest links — `?c=Name` greets the guest by name, or register a guest list and get one link each
+- 📝 Online RSVP with companions, a note to the couple, and CSV export
+- ⏳ Live countdown to the celebration
+- 📍 Ceremony, reception and party, each with address, Google Maps button and an "add to calendar" button
+- 🎁 Gift list with reservations (so nothing is brought twice), plus Pix key and bank details
+- 📷 Photo gallery with a lightbox, and a guestbook for the guests' wishes
+- 👗 Dress code, hashtag and optional background music
+- 🎨 Four templates (classic, botanical, modern, romantic), four typefaces and custom colours
+- 📱 Shareable link and a print-ready QR code
+
 ### SEO & Performance
-- Bilingual routes (`/menu/create` ↔ `/cardapio/criar`, etc.)
+- Bilingual routes (`/menu/create` ↔ `/cardapio/criar`, `/login` ↔ `/pt/entrar`, etc.)
 - `hreflang` alternate links, canonical tags, and Schema.org JSON-LD
-- Dynamic sitemap including all public menu pages
+- Dynamic sitemap including all public menu pages and the invitation landing pages
+- Invitation pages themselves are `noindex` — they belong to the couple's guests, not to search engines
 - Open Graph meta tags for social sharing
 
 ---
@@ -70,12 +84,12 @@ QRGenerate.net is an open-source web application that lets anyone create QR code
 | Layer | Technology |
 |---|---|
 | Framework | Laravel 12 (PHP 8.2) |
-| Database | SQLite (file-based, zero config) |
+| Database | MySQL 8 / MariaDB 10.4+ (SQLite used for the test suite) |
 | Frontend | Bootstrap 3.3.7 + Tailwind CSS 4 (Vite) |
 | QR Generation | EasyQRCodeJS (client-side canvas) |
 | Email | Laravel Mail (configurable SMTP / log driver) |
 | File Storage | Laravel Storage (`public` disk + symlink) |
-| Deployment | Any PHP 8.2+ host with SQLite support |
+| Deployment | Any PHP 8.2+ host with MySQL |
 
 ---
 
@@ -83,7 +97,8 @@ QRGenerate.net is an open-source web application that lets anyone create QR code
 
 ### Prerequisites
 
-- PHP ≥ 8.2 with extensions: `pdo_sqlite`, `mbstring`, `xml`, `curl`, `gd`
+- PHP ≥ 8.2 with extensions: `pdo_mysql`, `pdo_sqlite` (tests), `mbstring`, `xml`, `curl`, `gd`
+- MySQL ≥ 8.0 or MariaDB ≥ 10.4
 - [Composer](https://getcomposer.org/) ≥ 2
 - [Node.js](https://nodejs.org/) ≥ 18 + npm
 
@@ -104,10 +119,13 @@ npm install && npm run build
 cp .env.example .env
 php artisan key:generate
 
-# 5. Run database migrations
+# 5. Create the database, then point .env at it (DB_DATABASE / DB_USERNAME / DB_PASSWORD)
+mysql -u root -p -e "CREATE DATABASE qrgenerate CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# 6. Run database migrations
 php artisan migrate
 
-# 6. Create the storage symlink (for uploaded images)
+# 7. Create the storage symlink (for uploaded images)
 php artisan storage:link
 ```
 
@@ -121,11 +139,22 @@ Edit `.env` after copying `.env.example`. Key variables:
 APP_NAME=QRGenerate
 APP_URL=https://qrgenerate.net       # Your public domain
 
-# Database — SQLite works out of the box
-DB_CONNECTION=sqlite
-# DB_DATABASE=/absolute/path/to/database/database.sqlite
+# Database — MySQL / MariaDB
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=qrgenerate
+DB_USERNAME=root
+DB_PASSWORD=
 
-# Mail (required for the recovery-email feature)
+# Google sign-in (optional — email/password still works without it).
+# Create an OAuth 2.0 Client ID at https://console.cloud.google.com/apis/credentials
+# and register ${APP_URL}/auth/google/callback as an authorised redirect URI.
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
+
+# Mail (required for menu link recovery and password resets)
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.example.com
 MAIL_PORT=587
@@ -175,17 +204,35 @@ Point your web server document root to the `public/` directory.
 ```
 app/
   Http/Controllers/
-    MenuController.php      # Digital menu CRUD + email recovery
-    QrPageController.php    # QR Code generator pages
-    SitemapController.php   # Dynamic sitemap (includes public menus)
+    MenuController.php             # Digital menu CRUD + email recovery
+    QrPageController.php           # QR Code generator pages
+    SitemapController.php          # Dynamic sitemap (includes public menus)
+    InvitationController.php       # Invitation landing pages, owner CRUD, RSVP list + CSV
+    InvitationGuestController.php  # Guest list and personalised links
+    PublicInvitationController.php # Public invitation page, RSVP, guestbook, gift reservations
+    Auth/                          # Register, login, logout, password reset, Google sign-in
+  Http/Requests/
+    InvitationRequest.php          # Validation shared by create and update
   Models/
-    Menu.php                # Menu (slug, edit token, email fields)
-    MenuItem.php            # Item (price, image_url, badges)
-    MenuSection.php         # Section grouping items
+    Menu.php                       # Menu (slug, edit token, email fields)
+    MenuItem.php                   # Item (price, image_url, badges)
+    MenuSection.php                # Section grouping items
+    User.php                       # Account (nullable password for Google-only sign-in)
+    Invitation.php                 # The invitation itself (couple, date, theme, settings)
+    InvitationEvent.php            # Ceremony / reception / party, with map link
+    InvitationGuest.php            # Named guest + their ?c= code
+    InvitationRsvp.php             # A reply, with companions
+    InvitationGift.php             # Gift list entry and its reservation
+    InvitationPhoto.php            # Gallery photo
+    InvitationMessage.php          # Guestbook note
+  Support/
+    AuthSeo.php                    # SEO metadata for the account pages
+    InvitationLabels.php           # Bilingual form labels for the invitation builder
+    HandlesImageUploads.php        # Upload-or-paste-a-URL image handling
   Mail/
-    MenuLinkRecovery.php    # Mailable for lost edit-link recovery
+    MenuLinkRecovery.php           # Mailable for lost edit-link recovery
 
-database/migrations/        # All schema migrations (SQLite-compatible)
+database/migrations/        # All schema migrations (MySQL; also run on SQLite for tests)
 
 resources/views/
   menu/
@@ -195,6 +242,22 @@ resources/views/
     success.blade.php       # Post-creation page: QR, print, PDF, DOCX
     recover.blade.php       # Edit-link recovery via email
     landing.blade.php       # SEO landing pages (EN + PT)
+  invitations/
+    landing.blade.php       # SEO landing pages (EN + PT)
+    index.blade.php         # Owner dashboard listing their invitations
+    create.blade.php        # New invitation
+    edit.blade.php          # Edit an existing invitation
+    _form.blade.php         # The 8-step builder, shared by create and edit
+    _dash.blade.php         # Shared dashboard styling
+    share.blade.php         # Public link + QR code + next steps
+    guests.blade.php        # Guest list with one personalised link each
+    rsvps.blade.php         # Replies, totals and CSV export
+    show.blade.php          # The public invitation page (self-contained, themed)
+  auth/
+    login.blade.php
+    register.blade.php
+    forgot-password.blade.php
+    reset-password.blade.php
   components/
     header.blade.php
     footer.blade.php
@@ -225,7 +288,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 # Português
 
-> **Gerador de QR Code + Cardápio Digital para Restaurantes** — sem login, sem taxa, sem rastreamento de dados.
+> **Gerador de QR Code + Cardápio Digital + Convites de Casamento e Noivado** — grátis e sem rastreamento de dados.
 
 **Site ao vivo → [qrgenerate.net](https://qrgenerate.net)**
 
@@ -238,6 +301,8 @@ QRGenerate.net é uma aplicação web open-source que permite criar QR Codes e c
 **Gerador de QR Code:** Suporta URLs, links WhatsApp, credenciais Wi-Fi, texto simples, vCards e mais. Gera QR Codes em alta resolução SVG/PNG direto no navegador — nada é enviado ao servidor.
 
 **Gerador de Cardápio Digital:** Donos de restaurante montam o menu completo (seções, itens, preços, fotos) e recebem uma URL pública permanente + QR Code em segundos. Um link secreto de edição (baseado em token) permite atualizar o cardápio a qualquer momento, sem nunca criar uma conta.
+
+**Convite de Casamento e Noivado:** Qualquer pessoa cria uma conta grátis (com o Google ou apenas com e-mail) e monta o convite virtual do seu casamento ou noivado — com link personalizado por convidado, confirmação de presença, contagem regressiva, mapa do local, lista de presentes, galeria de fotos, mural de recados e QR Code.
 
 ---
 
@@ -262,6 +327,19 @@ QRGenerate.net é uma aplicação web open-source que permite criar QR Codes e c
 - 🎨 Cores primária e de destaque personalizáveis por cardápio
 - 📱 Totalmente responsivo — ótimo em qualquer dispositivo
 
+### Convite de Casamento e Noivado
+- 💍 Página de convite online para casamento ou noivado
+- 👤 Conta grátis com **login pelo Google** ou apenas e-mail e senha
+- 💌 Link personalizado por convidado — `?c=Nome` saúda o convidado pelo nome, ou cadastre a lista e receba um link para cada um
+- 📝 Confirmação de presença (RSVP) com acompanhantes, recado para o casal e exportação em CSV
+- ⏳ Contagem regressiva em tempo real
+- 📍 Cerimónia, recepção e festa, cada uma com endereço, botão do Google Maps e botão para adicionar à agenda
+- 🎁 Lista de presentes com reserva (para ninguém repetir presente), além de chave Pix e dados bancários
+- 📷 Galeria de fotos com visualização ampliada e mural de recados dos convidados
+- 👗 Traje, hashtag e música de fundo opcional
+- 🎨 Quatro estilos (clássico, botânico, moderno, romântico), quatro tipos de letra e cores personalizadas
+- 📱 Link para partilhar e QR Code pronto a imprimir
+
 ---
 
 ## Instalação Rápida
@@ -273,6 +351,10 @@ composer install
 npm install && npm run build
 cp .env.example .env
 php artisan key:generate
+
+# Crie a base de dados e aponte o .env para ela (DB_DATABASE / DB_USERNAME / DB_PASSWORD)
+mysql -u root -p -e "CREATE DATABASE qrgenerate CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
 php artisan migrate
 php artisan storage:link
 php artisan serve
@@ -289,7 +371,22 @@ Edite o arquivo `.env` após copiar `.env.example`. Principais variáveis:
 ```env
 APP_URL=https://qrgenerate.net
 
-# E-mail (necessário para recuperação de link)
+# Base de dados — MySQL / MariaDB
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=qrgenerate
+DB_USERNAME=root
+DB_PASSWORD=
+
+# Login com Google (opcional — o login por e-mail e senha funciona sem isto).
+# Crie um OAuth 2.0 Client ID em https://console.cloud.google.com/apis/credentials
+# e registe ${APP_URL}/auth/google/callback como URI de redireccionamento autorizado.
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
+
+# E-mail (necessário para recuperação de link e redefinição de senha)
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.seudominio.com
 MAIL_PORT=587
