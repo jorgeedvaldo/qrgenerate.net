@@ -73,8 +73,10 @@ QRGenerate.net is an open-source web application that lets anyone create QR code
 - 📷 Photo gallery with a lightbox, and a guestbook for the guests' wishes
 - 🖨️ **Printable keepsake card** naming the guest of honour, laid out for A5
 - ✨ Falling petals, a couple illustration, parallax detail, gold-foil lettering and confetti on a confirmed reply
-- 👗 Dress code, hashtag and optional background music
-- 🎨 Four templates (classic, botanical, modern, romantic), four typefaces and custom colours
+- 👗 Dress code with swatches, hashtag and optional background music
+- 🎨 **Ten templates** (lilac, botanical, classic, romantic, tropical, navy, terracotta, emerald, gold, modern) — each with its own palette, typeface, corner motif and solid or transparent information cards
+- 👨‍👩‍👧 Parents' names, a month calendar marking the big day and a dress-code colour palette
+- 🖌️ Four typefaces and custom colours on top of any template
 - 📱 Shareable link and a print-ready QR code
 
 ### SEO & Performance

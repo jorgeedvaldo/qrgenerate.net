@@ -16,7 +16,19 @@ class Invitation extends Model
 
     public const TYPES = ['wedding', 'engagement'];
 
-    public const TEMPLATES = ['classic', 'botanical', 'modern', 'romantic'];
+    /** Template keys live in config/invitation_templates.php. */
+    public static function templates(): array
+    {
+        return array_keys(config('invitation_templates', []));
+    }
+
+    /** The theme tokens for this invitation, falling back to the first template. */
+    public function theme(): array
+    {
+        $all = config('invitation_templates', []);
+
+        return $all[$this->template] ?? reset($all) ?: [];
+    }
 
     public const FONTS = ['cormorant', 'playfair', 'lora', 'montserrat'];
 
@@ -30,12 +42,14 @@ class Invitation extends Model
 
     protected $fillable = [
         'user_id', 'slug', 'type', 'template',
-        'partner_one_name', 'partner_two_name', 'display_title', 'tagline',
+        'partner_one_name', 'partner_two_name',
+        'partner_one_parents', 'partner_two_parents',
+        'display_title', 'tagline',
         'story', 'welcome_message',
         'event_date', 'event_time',
         'cover_url', 'couple_photo_url',
         'primary_color', 'accent_color', 'font',
-        'dress_code', 'dress_code_notes', 'guest_tips', 'ride_links',
+        'dress_code', 'dress_code_notes', 'dress_code_colors', 'guest_tips', 'ride_links',
         'hashtag', 'monogram', 'music_url',
         'envelope_enabled', 'petals_enabled', 'mascot_enabled',
         'gift_message', 'pix_key', 'pix_name', 'bank_details',
@@ -49,6 +63,7 @@ class Invitation extends Model
     protected $casts = [
         'event_date'        => 'date',
         'rsvp_deadline'     => 'date',
+        'dress_code_colors' => 'array',
         'guest_tips'        => 'array',
         'ride_links'        => 'array',
         'envelope_enabled'  => 'boolean',

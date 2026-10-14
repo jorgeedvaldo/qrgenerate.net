@@ -92,6 +92,20 @@
     .toggle input:checked + .toggle-slider { background: #7b4397; }
     .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
+    .tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+    .tpl-card {
+        display: block; text-align: center; cursor: pointer; margin: 0;
+        border: 2px solid #e9e2ef; border-radius: 10px; padding: 8px 6px 7px;
+        background: #fff; transition: border-color .2s, transform .2s, box-shadow .2s;
+    }
+    .tpl-card:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(91,40,122,.1); }
+    .tpl-card.on { border-color: #7b4397; box-shadow: 0 6px 16px rgba(123,67,151,.18); }
+    .tpl-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .tpl-swatch { display: block; height: 46px; border-radius: 7px; margin-bottom: 6px; }
+    .tpl-name { font-size: 12px; font-weight: 600; color: #4b5563; }
+    .swatch-pickers { display: flex; gap: 8px; flex-wrap: wrap; }
+    .swatch-pickers input[type=color] { width: 46px; height: 36px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 2px; }
+
     .swatch-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
     .swatch-row input[type=color] { width: 54px; height: 38px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 2px; }
     .theme-preview { flex: 1 1 160px; min-width: 150px; height: 38px; border-radius: 8px; }

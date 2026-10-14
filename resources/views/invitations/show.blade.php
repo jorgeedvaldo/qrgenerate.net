@@ -1,13 +1,21 @@
 @php
     use Illuminate\Support\Str;
 
+    $theme = $invitation->theme();
+    $ornament = $theme['ornament'] ?? 'none';
+    $solidCards = ($theme['cards'] ?? 'outline') === 'solid';
+
+    // The couple's own colours win; without them the template's own are used.
+    $primary = $invitation->primary_color ?: ($theme['primary'] ?? '#b08968');
+    $accent  = $invitation->accent_color  ?: ($theme['accent']  ?? '#7f5539');
+
     $fonts = [
         'cormorant'  => ['Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400', "'Cormorant Garamond', Georgia, serif"],
         'playfair'   => ['Playfair+Display:ital,wght@0,500;0,600;0,700;1,400', "'Playfair Display', Georgia, serif"],
         'lora'       => ['Lora:ital,wght@0,400;0,600;0,700;1,400', "'Lora', Georgia, serif"],
         'montserrat' => ['Montserrat:wght@300;400;600;700', "'Montserrat', Helvetica, sans-serif"],
     ];
-    [$fontQuery, $fontStack] = $fonts[$invitation->font] ?? $fonts['cormorant'];
+    [$fontQuery, $fontStack] = $fonts[$invitation->font] ?? $fonts[$theme['font'] ?? 'cormorant'] ?? $fonts['cormorant'];
 
     $months   = [1=>'Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     $weekdays = [0=>'Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
@@ -80,7 +88,7 @@
     <meta name="description" content="{{ $invitation->tagline ?: 'Convite de ' . $eventWord . ' de ' . $invitation->coupleNames() . ' — ' . $longDate . ' de ' . $starts->year }}">
     <meta name="robots" content="noindex, nofollow">
     <link rel="canonical" href="{{ $invitation->publicUrl() }}">
-    <meta name="theme-color" content="{{ $invitation->primary_color }}">
+    <meta name="theme-color" content="{{ $primary }}">
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $invitation->coupleNames() }} — Convite de {{ ucfirst($eventWord) }}">
@@ -97,19 +105,24 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         :root {
-            --primary: {{ $invitation->primary_color }};
-            --accent: {{ $invitation->accent_color }};
-            --primary-soft: {{ $invitation->primary_color }}1f;
-            --primary-line: {{ $invitation->primary_color }}44;
-            --gold: #b6893e;
-            --gold-light: #e2c78a;
-            --ink: #2d2825;
+            --primary: {{ $primary }};
+            --accent: {{ $accent }};
+            --primary-soft: {{ $primary }}1f;
+            --primary-line: {{ $primary }}44;
+            --gold: {{ $theme['foil'] ?? '#b6893e' }};
+            --gold-light: {{ $theme['foil_light'] ?? '#e2c78a' }};
+            --ink: {{ $theme['ink'] ?? '#2d2825' }};
             --muted: #7d766d;
-            --paper: #fdfbf7;
+            --paper: {{ $theme['paper'] ?? '#fdfbf7' }};
             --paper-deep: #f4ebdd;
             --card: #ffffff;
             --line: #ece5db;
-            --radius: 16px;
+            --radius: {{ $theme['radius'] ?? '16px' }};
+            --orn-stem: {{ $accent }}aa;
+            --orn-leaf: {{ $primary }}66;
+            --orn-leaf-2: {{ $accent }}4d;
+            --orn-bloom: {{ $primary }}99;
+            --orn-bloom-2: {{ $accent }}80;
             --shadow: 0 22px 60px rgba(60,40,20,.18);
             --serif: {!! $fontStack !!};
             --script: 'Alex Brush', cursive;
@@ -129,16 +142,78 @@
             content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
                 radial-gradient(circle at 12% 8%, var(--primary-soft), transparent 40%),
-                radial-gradient(circle at 92% 88%, {{ $invitation->accent_color }}1f, transparent 45%);
+                radial-gradient(circle at 92% 88%, {{ $accent }}1f, transparent 45%);
         }
         ::selection { background: var(--primary); color: #fff; }
         svg { display: block; }
 
-        /* ── Templates ───────────────────────────────────────────────── */
-        body[data-template="botanical"] { --paper: #fbf8f2; }
-        body[data-template="modern"] { --paper: #fff; --radius: 4px; }
-        body[data-template="modern"] .section-title { letter-spacing: .26em; }
-        body[data-template="romantic"] { --paper: #fdf9f7; }
+        /* ── Corner ornaments ────────────────────────────────────────── */
+        .orn-layer { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+        .orn { position: absolute; width: clamp(130px, 26vw, 230px); height: auto; opacity: .55; }
+        .orn-tl { top: -14px; left: -14px; }
+        .orn-tr { top: -14px; right: -14px; transform: scaleX(-1); }
+        .orn-bl { bottom: -14px; left: -14px; transform: scaleY(-1); }
+        .orn-br { bottom: -14px; right: -14px; transform: scale(-1); }
+        @media (max-width: 560px) { .orn { opacity: .4; } .orn-bl, .orn-br { display: none; } }
+
+        /* Solid-card templates print the information blocks in the theme colour. */
+        body[data-cards="solid"] .card-feature {
+            background: linear-gradient(165deg, var(--primary), var(--accent));
+            border-color: transparent; color: #fff;
+        }
+        body[data-cards="solid"] .card-feature .section-title,
+        body[data-cards="solid"] .card-feature .ks-side-txt { color: rgba(255,255,255,.82); }
+        body[data-cards="solid"] .card-feature .place,
+        body[data-cards="solid"] .card-feature .land,
+        body[data-cards="solid"] .card-feature .meta,
+        body[data-cards="solid"] .card-feature .big-date .d,
+        body[data-cards="solid"] .card-feature h3 { color: #fff; }
+        body[data-cards="solid"] .card-feature .note {
+            background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.28); color: rgba(255,255,255,.92);
+        }
+        body[data-cards="solid"] .card-feature .big-date { border-color: rgba(255,255,255,.35); }
+        body[data-cards="solid"] .card-feature .parents { color: rgba(255,255,255,.85); }
+        body[data-cards="solid"] .card-feature .parents i { background: rgba(255,255,255,.35); }
+
+        /* ── Parents ─────────────────────────────────────────────────── */
+        .parents {
+            display: flex; gap: 18px; justify-content: center; align-items: stretch;
+            font-size: .92rem; color: var(--muted); margin-bottom: 14px; text-align: center;
+        }
+        .parents > div { flex: 1; max-width: 200px; white-space: pre-line; }
+        .parents i { width: 1px; background: var(--primary-line); flex: 0 0 1px; }
+
+        /* ── Big date block ──────────────────────────────────────────── */
+        .big-date {
+            display: flex; align-items: center; justify-content: center; gap: 14px;
+            border-top: 1px solid var(--primary-line); border-bottom: 1px solid var(--primary-line);
+            padding: 12px 0; margin: 14px 0 4px;
+        }
+        .big-date .side { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+        .big-date .d { font-size: 2.6rem; font-weight: 700; line-height: 1; }
+        .big-date .stack { display: flex; flex-direction: column; gap: 2px; }
+
+        /* ── Month calendar ──────────────────────────────────────────── */
+        .calendar { max-width: 320px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+        .calendar caption { font-size: .9rem; color: var(--muted); padding-bottom: 10px; caption-side: top; }
+        .calendar table { width: 100%; border-collapse: collapse; }
+        .calendar th { font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; padding-bottom: 6px; }
+        .calendar td { padding: 4px 0; font-size: .92rem; font-variant-numeric: tabular-nums; }
+        .calendar td.on span {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: var(--primary); color: #fff; font-weight: 700;
+        }
+
+        /* ── Dress code swatches ─────────────────────────────────────── */
+        .swatches { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+        .swatches i {
+            width: 38px; height: 38px; border-radius: 50%; display: block;
+            border: 1px solid rgba(0,0,0,.12); box-shadow: 0 2px 6px rgba(0,0,0,.08);
+        }
+
+        /* ── Gallery counter ─────────────────────────────────────────── */
+        .gallery-count { font-size: .82rem; color: var(--muted); letter-spacing: .1em; margin-top: 10px; }
 
         /* ── Petals ──────────────────────────────────────────────────── */
         #petals { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
@@ -168,7 +243,7 @@
         }
         .env-flap {
             position: absolute; top: 0; left: 0; right: 0; height: 58%;
-            background: linear-gradient(160deg, var(--accent), {{ $invitation->accent_color }});
+            background: linear-gradient(160deg, var(--accent), {{ $accent }});
             filter: brightness(.88);
             clip-path: polygon(0 0, 100% 0, 50% 100%);
             border-radius: 14px 14px 0 0; z-index: 3;
@@ -564,7 +639,9 @@
         }
     </style>
 </head>
-<body data-template="{{ $invitation->template }}">
+<body data-template="{{ $invitation->template }}" data-cards="{{ $theme['cards'] ?? 'outline' }}">
+
+@include('invitations._ornament', ['ornament' => $ornament])
 
 @if($invitation->petals_enabled)
     <canvas id="petals"></canvas>
@@ -662,6 +739,13 @@
                 <svg class="mascot"><use href="#couple"/></svg>
             @endif
             <span class="badge-tag">{{ $kicker }}</span>
+            @if($invitation->partner_one_parents || $invitation->partner_two_parents)
+                <div class="parents">
+                    <div>{{ $invitation->partner_one_parents }}</div>
+                    @if($invitation->partner_one_parents && $invitation->partner_two_parents)<i></i>@endif
+                    <div>{{ $invitation->partner_two_parents }}</div>
+                </div>
+            @endif
             <h1 class="names">
                 <span class="gold-foil">{{ $invitation->partner_one_name }}</span>
                 @if($invitation->partner_two_name)
@@ -683,6 +767,31 @@
                         <div class="cd-box"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">Seg</div></div>
                     </div>
                     <p class="cd-done" id="cd-done" style="display:none;">O grande dia chegou! &#128141;</p>
+                </div>
+
+                @php
+                    $first = $starts->copy()->startOfMonth();
+                    $lead = (int) $first->format('w');
+                    $days = (int) $starts->daysInMonth;
+                @endphp
+                <div class="calendar">
+                    <table>
+                        <caption>{{ mb_strtolower($months[(int) $starts->month]) }} de {{ $starts->year }}</caption>
+                        <thead>
+                            <tr>@foreach(['dom','seg','ter','qua','qui','sex','sáb'] as $d)<th>{{ $d }}</th>@endforeach</tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                @for($blank = 0; $blank < $lead; $blank++)<td></td>@endfor
+                                @for($day = 1; $day <= $days; $day++)
+                                    <td class="{{ $day === (int) $starts->day ? 'on' : '' }}">
+                                        <span>{{ $day }}</span>
+                                    </td>
+                                    @if(($lead + $day) % 7 === 0 && $day < $days)</tr><tr>@endif
+                                @endfor
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             @endif
 
@@ -787,17 +896,23 @@
                     $eDate = $event->event_date ?: $invitation->event_date;
                     $eTime = $event->event_time ?: $invitation->event_time;
                 @endphp
-                <div class="card addr-card">
+                <div class="card addr-card card-feature">
                     <p class="section-title">{{ $kinds[$event->kind] ?? 'Programa' }}</p>
                     <p class="place">{{ $event->venue_name ?: $event->title }}</p>
                     @if($event->venue_name && $event->title !== $event->venue_name)
                         <p class="land">{{ $event->title }}</p>
                     @endif
                     @if($event->address)<p class="land">{{ $event->address }}</p>@endif
-                    <p class="meta">
-                        {{ $weekdays[(int) $eDate->format('w')] }}, {{ $eDate->day }} de {{ $months[(int) $eDate->month] }}
-                        @if($eTime) &middot; {{ substr($eTime, 0, 5) }} @endif
-                    </p>
+                    <div class="big-date">
+                        <span class="side">{{ $weekdays[(int) $eDate->format('w')] }}</span>
+                        <div class="stack">
+                            <span class="d">{{ $eDate->day }}</span>
+                        </div>
+                        <span class="side">
+                            {{ mb_strtoupper($months[(int) $eDate->month]) }}<br>{{ $eDate->year }}
+                        </span>
+                        @if($eTime)<span class="side">às {{ substr($eTime, 0, 5) }}</span>@endif
+                    </div>
                     @if($event->notes)<p class="note" style="margin-top:10px;">{{ $event->notes }}</p>@endif
                 </div>
             @endforeach
@@ -813,7 +928,7 @@
                 @if($mainVenue && $mainVenue->mapsLink())
                     <a class="btn" href="{{ $mainVenue->mapsLink() }}" target="_blank" rel="noopener">
                         <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2Z"/></svg>
-                        Google Maps
+                        Como chegar
                     </a>
                 @endif
                 @if($fullAddress)
@@ -890,11 +1005,18 @@
             <p class="script-sub">Informações úteis</p>
 
             @if($hasDressCode)
-                <div class="card" style="max-width:440px;margin:0 auto;">
-                    <p class="section-title">Traje</p>
+                <div class="card card-feature" style="max-width:440px;margin:0 auto;">
+                    <p class="section-title">Dress code</p>
                     <p class="place">{{ $invitation->dress_code ?: 'Como se vestir' }}</p>
                     @if($invitation->dress_code_notes)
                         <p class="note" style="margin-top:10px;">{{ $invitation->dress_code_notes }}</p>
+                    @endif
+                    @if($invitation->dress_code_colors)
+                        <div class="swatches">
+                            @foreach($invitation->dress_code_colors as $swatch)
+                                <i style="background:{{ $swatch }}" title="{{ $swatch }}"></i>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
             @endif
@@ -935,6 +1057,7 @@
                     </figure>
                 @endforeach
             </div>
+            <p class="gallery-count">{{ $invitation->photos->count() }} {{ $invitation->photos->count() === 1 ? 'foto' : 'fotos' }}</p>
             @if($next = $nextAfter('galeria'))
                 <a href="#{{ $next }}" class="next-btn" aria-label="Ver a secção seguinte"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></a>
             @endif

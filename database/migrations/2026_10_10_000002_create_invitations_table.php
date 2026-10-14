@@ -15,7 +15,7 @@ return new class extends Migration
 
             // wedding | engagement (birthday reserved for a later release)
             $table->string('type', 20)->default('wedding');
-            $table->string('template', 30)->default('classic');
+            $table->string('template', 30)->default('lilas');
 
             // Who is celebrating
             $table->string('partner_one_name');

@@ -24,6 +24,8 @@ $faqs = $isPt ? [
      'a' => 'Ao abrir o link, o convidado vê um envelope fechado com um selo e as suas iniciais. Basta tocar no selo para o envelope abrir e o convite aparecer — e a música de fundo começa nesse momento. Pode desligar esta abertura nas opções do convite.'],
     ['q' => 'Os convidados podem guardar ou imprimir o convite?',
      'a' => 'Sim. No fim do convite há um cartão com o nome do convidado de honra e o botão "Baixar / imprimir convite", que abre a impressão já no formato A5 — dá para guardar em PDF ou imprimir em papel.'],
+    ['q' => 'Quantos modelos de convite existem?',
+     'a' => 'Dez: lilás, botânico, clássico, romântico, tropical, marinho, terracota, esmeralda, dourado e moderno. Cada modelo traz a sua paleta, a sua letra, as suas flores nos cantos e cartões de informação cheios ou transparentes. Pode trocar de modelo a qualquer momento e ainda afinar as duas cores à mão.'],
     ['q' => 'Posso entrar com a minha conta Google?',
      'a' => 'Sim. Pode criar a conta com o Google num clique ou usar apenas o e-mail e uma senha.'],
 ] : [
@@ -45,6 +47,8 @@ $faqs = $isPt ? [
      'a' => 'When the link opens, the guest sees a sealed envelope carrying your initials. One tap on the seal opens it and reveals the invitation — and the background music starts right then. You can switch the intro off in the invitation settings.'],
     ['q' => 'Can guests save or print the invitation?',
      'a' => 'Yes. At the end of the invitation there is a card naming the guest of honour and a "Download / print invitation" button that opens the print dialog already set to A5 — save it as a PDF or print it on paper.'],
+    ['q' => 'How many templates are there?',
+     'a' => 'Ten: lilac, botanical, classic, romantic, tropical, navy, terracotta, emerald, gold and modern. Each one brings its own palette, typeface, corner flowers and solid or transparent information cards. Switch template whenever you like, and fine-tune the two colours by hand.'],
     ['q' => 'Can I sign in with Google?',
      'a' => 'Yes. Create your account with Google in one click, or use just an email and a password.'],
 ];
@@ -141,8 +145,19 @@ $faqs = $isPt ? [
     .type-card p { font-size: 14px; color: #666; line-height: 1.6; margin: 0 0 18px; }
     .type-card a { display: inline-block; background: #f3edf7; color: #5b287a !important; border-radius: 8px; padding: 10px 24px; font-weight: 700; font-size: 14px; text-decoration: none; }
     .type-card a:hover { background: #ece0f3; text-decoration: none; }
+    .tpl-gallery { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 60px; }
+    .tpl-tile { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+    .tpl-tile .sheet { height: 96px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .tpl-tile .sheet span { font-family: Georgia, serif; font-size: 20px; font-style: italic; }
+    .tpl-tile .sheet i {
+        position: absolute; width: 26px; height: 26px; border-radius: 50% 0 50% 50%; opacity: .55;
+    }
+    .tpl-tile .sheet i.a { top: 8px; left: 8px; }
+    .tpl-tile .sheet i.b { bottom: 8px; right: 8px; transform: rotate(180deg); }
+    .tpl-tile p { margin: 0; padding: 9px 6px; font-size: 12.5px; font-weight: 700; text-align: center; color: #444; }
     @media(max-width:680px) {
         .steps-grid, .features-grid, .type-cards { grid-template-columns: 1fr; }
+        .tpl-gallery { grid-template-columns: repeat(2, 1fr); }
         .landing-hero h1 { font-size: 26px; }
         .cta-section { padding: 30px 20px; }
     }
@@ -259,6 +274,7 @@ $faqs = $isPt ? [
     <div class="features-grid">
         @php
         $features = $isPt ? [
+            ['🎨', '10 modelos de convite', 'Lilás, botânico, clássico, romântico, tropical, marinho, terracota, esmeralda, dourado e moderno — cada um com a sua paleta, letra e flores nos cantos.'],
             ['💌', 'Link personalizado', 'Cada convidado vê o seu próprio nome no convite: basta usar ?c=Nome ou a lista de convidados.'],
             ['📝', 'Confirmação de presença', 'O convidado confirma, diz quantos acompanhantes leva e deixa um recado. Você exporta tudo em CSV.'],
             ['⏳', 'Contagem regressiva', 'Dias, horas e minutos para o grande dia, actualizados em tempo real.'],
@@ -273,6 +289,7 @@ $faqs = $isPt ? [
             ['🖨️', 'Convite para imprimir', 'Cartão em A5 com o nome do convidado de honra.'],
             ['📱', 'QR Code e partilha', 'QR Code pronto a imprimir e botões de partilha para WhatsApp e Facebook.'],
         ] : [
+            ['🎨', '10 invitation templates', 'Lilac, botanical, classic, romantic, tropical, navy, terracotta, emerald, gold and modern — each with its own palette, typeface and corner flowers.'],
             ['💌', 'Personalised link', 'Every guest sees their own name on the invitation — use ?c=Name or your guest list.'],
             ['📝', 'Online RSVP', 'Guests confirm, say how many companions they bring and leave a note. Export it all as CSV.'],
             ['⏳', 'Countdown', 'Days, hours and minutes to the big day, updating live.'],
@@ -295,6 +312,22 @@ $faqs = $isPt ? [
                     <h4>{{ $heading }}</h4>
                     <p>{{ $text }}</p>
                 </div>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- The ten templates --}}
+    <h2 class="section-title">{{ $isPt ? 'Dez modelos de convite' : 'Ten invitation templates' }}</h2>
+    <p class="section-sub">{{ $isPt ? 'Escolha um modelo e afine as cores como quiser — pode trocar depois' : 'Pick a template and tune the colours as you like — you can switch later' }}</p>
+    <div class="tpl-gallery">
+        @foreach(config('invitation_templates') as $key => $tpl)
+            <div class="tpl-tile">
+                <div class="sheet" style="background:{{ $tpl['paper'] }};">
+                    <i class="a" style="background:{{ $tpl['primary'] }}"></i>
+                    <i class="b" style="background:{{ $tpl['accent'] }}"></i>
+                    <span style="color:{{ $tpl['accent'] }}">A &amp; Q</span>
+                </div>
+                <p>{{ $tpl['label'][$isPt ? 'pt' : 'en'] }}</p>
             </div>
         @endforeach
     </div>

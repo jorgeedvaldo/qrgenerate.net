@@ -119,6 +119,20 @@
 
     <div class="grid-2">
         <div class="form-group">
+            <label>{{ $t['parents1'] }}</label>
+            <input type="text" name="partner_one_parents" class="form-control" maxlength="160"
+                   placeholder="{{ $t['parents_ph'] }}" value="{{ $val('partner_one_parents') }}">
+        </div>
+        <div class="form-group">
+            <label>{{ $t['parents2'] }}</label>
+            <input type="text" name="partner_two_parents" class="form-control" maxlength="160"
+                   placeholder="{{ $t['parents_ph'] }}" value="{{ $val('partner_two_parents') }}">
+        </div>
+    </div>
+    <span class="help-small" style="margin:-8px 0 14px;display:block;">{{ $t['parents_hint'] }}</span>
+
+    <div class="grid-2">
+        <div class="form-group">
             <label>{{ $t['date'] }} *</label>
             <input type="date" name="event_date" class="form-control" required
                    value="{{ $val('event_date') }}">
@@ -158,17 +172,25 @@
     <p class="panel-hint">{{ $t['s2_hint'] }}</p>
 
     <div class="grid-2">
-        <div class="form-group">
+        <div class="form-group" style="grid-column:1/-1;">
             <label>{{ $t['template'] }}</label>
-            <select name="template" class="form-control">
-                @foreach($t['templates'] as $key => $label)
-                    <option value="{{ $key }}" @selected($val('template', 'classic') === $key)>{{ $label }}</option>
+            <div class="tpl-grid">
+                @foreach(config('invitation_templates') as $key => $tpl)
+                    <label class="tpl-card {{ $val('template', 'lilas') === $key ? 'on' : '' }}"
+                           data-primary="{{ $tpl['primary'] }}" data-accent="{{ $tpl['accent'] }}"
+                           data-font="{{ $tpl['font'] }}">
+                        <input type="radio" name="template" value="{{ $key }}" @checked($val('template', 'lilas') === $key)>
+                        <span class="tpl-swatch" style="background:linear-gradient(145deg,{{ $tpl['primary'] }},{{ $tpl['accent'] }});
+                              box-shadow:inset 0 -14px 0 {{ $tpl['paper'] }};"></span>
+                        <span class="tpl-name">{{ $tpl['label'][$isPt ? 'pt' : 'en'] }}</span>
+                    </label>
                 @endforeach
-            </select>
+            </div>
+            <span class="help-small">{{ $t['template_hint'] }}</span>
         </div>
         <div class="form-group">
             <label>{{ $t['font'] }}</label>
-            <select name="font" class="form-control">
+            <select name="font" id="font" class="form-control">
                 @foreach($t['fonts'] as $key => $label)
                     <option value="{{ $key }}" @selected($val('font', 'cormorant') === $key)>{{ $label }}</option>
                 @endforeach
@@ -367,6 +389,17 @@
                    placeholder="{{ $t['hashtag_ph'] }}" value="{{ $val('hashtag') }}">
         </div>
     </div>
+    <div class="form-group">
+        <label>{{ $t['dress_colors'] }}</label>
+        <div class="swatch-pickers">
+            @php $dressColors = old('dress_colors') ?? ($inv?->dress_code_colors ?? []); @endphp
+            @for($i = 0; $i < 5; $i++)
+                <input type="color" name="dress_colors[{{ $i }}]" value="{{ $dressColors[$i] ?? '#000000' }}">
+            @endfor
+        </div>
+        <span class="help-small">{{ $t['dress_colors_hint'] }}</span>
+    </div>
+
     <div class="form-group">
         <label>{{ $t['dress_notes'] }}</label>
         <textarea name="dress_code_notes" class="form-control" rows="2" maxlength="600"
@@ -786,6 +819,30 @@ function addPhoto() { addFrom('photos', 'photosList'); }
 function removeItem(button) {
     button.closest('.repeater-item').remove();
 }
+
+// Choosing a template highlights it and loads its suggested colours and typeface.
+(function () {
+    var cards = document.querySelectorAll('.tpl-card');
+    if (!cards.length) return;
+
+    cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+            cards.forEach(function (c) { c.classList.remove('on'); });
+            card.classList.add('on');
+
+            var primary = document.getElementById('primary_color');
+            var accent = document.getElementById('accent_color');
+            if (primary && accent) {
+                primary.value = card.dataset.primary;
+                accent.value = card.dataset.accent;
+                primary.dispatchEvent(new Event('input'));
+            }
+
+            var font = document.getElementById('font');
+            if (font && card.dataset.font) font.value = card.dataset.font;
+        });
+    });
+})();
 
 // Live swatch of the two chosen colours.
 (function () {

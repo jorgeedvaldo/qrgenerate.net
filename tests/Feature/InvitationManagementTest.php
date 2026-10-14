@@ -248,7 +248,7 @@ class InvitationManagementTest extends TestCase
     {
         return [
             'type'             => 'engagement',
-            'template'         => 'botanical',
+            'template'         => 'botanico',
             'font'             => 'cormorant',
             'partner_one_name' => 'Aurora',
             'partner_two_name' => 'Edvaldo',

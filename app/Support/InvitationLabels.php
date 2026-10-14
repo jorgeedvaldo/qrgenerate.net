@@ -31,6 +31,12 @@ class InvitationLabels
             'delete'       => 'Eliminar convite',
             'delete_ask'   => 'Eliminar este convite? Todas as confirmações e recados serão apagados. Esta acção não pode ser desfeita.',
 
+            'parents1'    => 'Pais do primeiro nome',
+            'parents2'    => 'Pais do segundo nome',
+            'parents_ph'  => 'Ex: Sr. e Sra. Belmiro Cuna e Rosália Cuna',
+            'parents_hint' => 'Aparecem por cima dos nomes, como nos convites tradicionais.',
+            'dress_colors'      => 'Cores sugeridas para o traje',
+            'dress_colors_hint' => 'Pequenos círculos que mostram a paleta ao convidado. Deixe a preto para não usar.',
             'monogram'      => 'Iniciais do selo',
             'monogram_ph'   => 'Ex: A & Q',
             'monogram_hint' => 'Aparece no selo do envelope. Deixe vazio para usar as iniciais dos nomes.',
@@ -101,13 +107,8 @@ class InvitationLabels
 
             's2'      => 'Aparência',
             's2_hint' => 'Escolha o estilo, as cores e as fotos do convite.',
-            'template'  => 'Estilo',
-            'templates' => [
-                'classic'   => 'Clássico',
-                'botanical' => 'Botânico',
-                'modern'    => 'Moderno',
-                'romantic'  => 'Romântico',
-            ],
+            'template'  => 'Modelo do convite',
+            'template_hint' => 'Cada modelo traz as suas cores, letras e ornamentos florais. Pode ajustar as cores depois.',
             'font'  => 'Tipo de letra',
             'fonts' => [
                 'cormorant'  => 'Cormorant (elegante)',
@@ -224,6 +225,12 @@ class InvitationLabels
             'delete'       => 'Delete invitation',
             'delete_ask'   => 'Delete this invitation? Every reply and guestbook note will be removed. This cannot be undone.',
 
+            'parents1'    => 'Parents of the first name',
+            'parents2'    => 'Parents of the second name',
+            'parents_ph'  => 'e.g. Mr and Mrs Belmiro Cuna and Rosália Cuna',
+            'parents_hint' => 'Shown above the names, as on a traditional invitation.',
+            'dress_colors'      => 'Suggested colours for the outfit',
+            'dress_colors_hint' => 'Small circles showing the palette to your guests. Leave them black to skip.',
             'monogram'      => 'Seal initials',
             'monogram_ph'   => 'e.g. A & Q',
             'monogram_hint' => 'Shown on the envelope seal. Leave empty to use the initials of the names.',
@@ -294,13 +301,8 @@ class InvitationLabels
 
             's2'      => 'Look and feel',
             's2_hint' => 'Pick the style, colours and photos.',
-            'template'  => 'Style',
-            'templates' => [
-                'classic'   => 'Classic',
-                'botanical' => 'Botanical',
-                'modern'    => 'Modern',
-                'romantic'  => 'Romantic',
-            ],
+            'template'  => 'Invitation template',
+            'template_hint' => 'Each template brings its own colours, type and floral ornaments. You can tune the colours afterwards.',
             'font'  => 'Typeface',
             'fonts' => [
                 'cormorant'  => 'Cormorant (elegant)',

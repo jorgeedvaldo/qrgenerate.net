@@ -13,11 +13,13 @@ class InvitationRequest extends FormRequest
     {
         return [
             'type'              => ['required', Rule::in(Invitation::TYPES)],
-            'template'          => ['nullable', Rule::in(Invitation::TEMPLATES)],
+            'template'          => ['nullable', Rule::in(Invitation::templates())],
             'font'              => ['nullable', Rule::in(Invitation::FONTS)],
 
             'partner_one_name'  => ['required', 'string', 'max:80'],
             'partner_two_name'  => ['nullable', 'string', 'max:80'],
+            'partner_one_parents' => ['nullable', 'string', 'max:160'],
+            'partner_two_parents' => ['nullable', 'string', 'max:160'],
             'display_title'     => ['nullable', 'string', 'max:120'],
             'tagline'           => ['nullable', 'string', 'max:160'],
             'story'             => ['nullable', 'string', 'max:3000'],
@@ -36,6 +38,8 @@ class InvitationRequest extends FormRequest
 
             'dress_code'        => ['nullable', 'string', 'max:120'],
             'dress_code_notes'  => ['nullable', 'string', 'max:600'],
+            'dress_colors'      => ['nullable', 'array', 'max:8'],
+            'dress_colors.*'    => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'hashtag'           => ['nullable', 'string', 'max:80'],
             'monogram'          => ['nullable', 'string', 'max:12'],
             'envelope_enabled'  => ['nullable', 'boolean'],

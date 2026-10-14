@@ -246,10 +246,12 @@ class InvitationController extends Controller
 
         return [
             'type'              => $data['type'],
-            'template'          => $data['template'] ?? 'classic',
+            'template'          => $data['template'] ?? 'lilas',
             'font'              => $data['font'] ?? 'cormorant',
             'partner_one_name'  => $data['partner_one_name'],
             'partner_two_name'  => $data['partner_two_name'] ?? null,
+            'partner_one_parents' => $data['partner_one_parents'] ?? null,
+            'partner_two_parents' => $data['partner_two_parents'] ?? null,
             'display_title'     => $data['display_title'] ?? null,
             'tagline'           => $data['tagline'] ?? null,
             'story'             => $data['story'] ?? null,
@@ -262,6 +264,7 @@ class InvitationController extends Controller
             'accent_color'      => $data['accent_color'] ?? '#7f5539',
             'dress_code'        => $data['dress_code'] ?? null,
             'dress_code_notes'  => $data['dress_code_notes'] ?? null,
+            'dress_code_colors' => array_values(array_filter($data['dress_colors'] ?? [])) ?: null,
             'hashtag'           => $data['hashtag'] ?? null,
             'monogram'          => $data['monogram'] ?? null,
             'envelope_enabled'  => $request->boolean('envelope_enabled'),

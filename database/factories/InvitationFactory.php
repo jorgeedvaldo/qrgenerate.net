@@ -23,7 +23,7 @@ class InvitationFactory extends Factory
             'user_id'          => User::factory(),
             'slug'             => Str::slug("{$one}-e-{$two}-" . fake()->unique()->numberBetween(1, 99999)),
             'type'             => 'wedding',
-            'template'         => 'classic',
+            'template'         => 'classico',
             'partner_one_name' => $one,
             'partner_two_name' => $two,
             'event_date'       => now()->addMonths(6)->toDateString(),
