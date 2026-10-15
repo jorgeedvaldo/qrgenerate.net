@@ -4,6 +4,7 @@
     <p style="margin-bottom:8px;">
         @if(($locale ?? 'en') === 'pt')
             <a href="{{ url('/pt') }}">Gerador de QR Code</a> &middot;
+            <a href="{{ route('invitation.landing.pt') }}">Convite de Casamento Online</a> &middot;
             <a href="{{ url('/pt/qr-code-para-whatsapp') }}">QR Code para WhatsApp</a> &middot;
             <a href="{{ url('/pt/qr-code-para-wifi') }}">QR Code para Wi-Fi</a> &middot;
             <a href="{{ url('/pt/qr-code-com-logotipo') }}">QR Code com Logotipo</a> &middot;
@@ -16,6 +17,7 @@
             <a href="{{ url('/pt/termos-de-uso') }}" style="font-size: 13px;">Termos de Uso</a>
         @else
             <a href="{{ url('/free-qr-code-generator') }}">Free QR Code Generator</a> &middot;
+            <a href="{{ route('invitation.landing.en') }}">Wedding Invitation Generator</a> &middot;
             <a href="{{ url('/qr-code-for-whatsapp') }}">QR Code for WhatsApp</a> &middot;
             <a href="{{ url('/qr-code-for-wifi') }}">QR Code for Wi-Fi</a> &middot;
             <a href="{{ url('/qr-code-with-logo') }}">QR Code with Logo</a> &middot;

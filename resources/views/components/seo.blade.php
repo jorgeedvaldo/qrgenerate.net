@@ -14,6 +14,7 @@
     $ogType      = $seo['og_type']        ?? config('qrgenerate.seo.og_type');
     $twitterCard = $seo['twitter_card']   ?? config('qrgenerate.seo.twitter_card');
     $hreflang    = $seo['hreflang']       ?? [];
+    $robots      = $seo['robots']         ?? null;
 @endphp
 
 <title>{{ $title }}</title>
@@ -22,6 +23,9 @@
 <meta name="keywords" content="{{ $keywords }}">
 @endif
 <meta name="author" content="{{ config('qrgenerate.seo.author') }}">
+@if($robots)
+<meta name="robots" content="{{ $robots }}">
+@endif
 <link rel="canonical" href="{{ $canonical }}">
 
 {{-- Hreflang tags --}}

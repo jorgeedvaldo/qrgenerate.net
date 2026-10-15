@@ -89,6 +89,12 @@ class SitemapController extends Controller
                 ];
             });
 
+        // ── Invitation landing pages ──
+        // Individual invitations are private to their guests, so only the
+        // landing pages belong in the sitemap.
+        $urls[] = ['loc' => "{$baseUrl}/wedding-invitation-generator",     'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.9'];
+        $urls[] = ['loc' => "{$baseUrl}/pt/convite-de-casamento-online",   'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.9'];
+
         // ── Article index pages ──
         $urls[] = ['loc' => "{$baseUrl}/articles", 'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.7'];
         $urls[] = ['loc' => "{$baseUrl}/pt/artigos", 'lastmod' => $today, 'changefreq' => 'weekly', 'priority' => '0.7'];
